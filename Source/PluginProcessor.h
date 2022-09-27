@@ -19,6 +19,7 @@ class Juce4Unity_SamplerAudioProcessor  : public juce::AudioProcessor
                             #if JucePlugin_Enable_ARA
                              , public juce::AudioProcessorARAExtension
                             #endif
+, juce::HighResolutionTimer
 {
 public:
     //==============================================================================
@@ -59,7 +60,12 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
 private:
+    juce::Random random;
     sfzero::Synth synth;
+
+    bool playingNotes;
+    
+    void hiResTimerCallback() override;
     
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Juce4Unity_SamplerAudioProcessor)

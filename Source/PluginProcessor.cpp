@@ -21,6 +21,23 @@ Juce4Unity_SamplerAudioProcessor::Juce4Unity_SamplerAudioProcessor()
                        )
 #endif
 {
+    juce::AudioFormatManager manager;
+    manager.registerBasicFormats();
+    
+    for (int i = 0; i < 128; ++i)
+    {
+        synth.addVoice(new sfzero::Voice());
+    }
+    
+    auto sfzFile = juce::File("E:\\Downloads\\UprightPianoKW-SFZ-20220221\\UprightPianoKW-20220221.sfz");
+    auto sound = new sfzero::Sound(sfzFile);
+    sound->loadRegions();
+    sound->loadSamples(&manager);
+    
+    synth.clearSounds();
+    synth.addSound(sound);
+
+    startTimer(1000);
 }
 
 Juce4Unity_SamplerAudioProcessor::~Juce4Unity_SamplerAudioProcessor()
@@ -94,6 +111,8 @@ void Juce4Unity_SamplerAudioProcessor::prepareToPlay (double sampleRate, int sam
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+
+    synth.setCurrentPlaybackSampleRate(sampleRate);
 }
 
 void Juce4Unity_SamplerAudioProcessor::releaseResources()
@@ -159,6 +178,23 @@ void Juce4Unity_SamplerAudioProcessor::setStateInformation (const void* data, in
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+}
+
+void Juce4Unity_SamplerAudioProcessor::hiResTimerCallback()
+{
+    // if(playingNotes)
+    // {
+    // }
+    // else
+    // {
+        // synth.allNotesOff(1, false);
+        synth.noteOn(1, 60, random.nextFloat());
+        synth.noteOn(1, 62, random.nextFloat());
+        synth.noteOn(1, 65, random.nextFloat());
+        synth.noteOn(1, 67, random.nextFloat());
+    // }
+
+    // playingNotes = !playingNotes;
 }
 
 //==============================================================================
