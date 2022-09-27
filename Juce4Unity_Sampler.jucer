@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="dW5X7B" name="Juce4Unity_Sampler" projectType="audioplug"
+              useAppConfig="0" addUsingNamespaceToJuceHeader="0" displaySplashScreen="1"
+              jucerFormatVersion="1" pluginFormats="buildStandalone,buildUnity"
+              pluginCharacteristicsValue="pluginIsSynth" companyName="Ethinx"
+              companyCopyright="2022">
+  <MAINGROUP id="K57nX0" name="Juce4Unity_Sampler">
+    <GROUP id="{E3022A5C-EED3-638E-7E8B-BA5D683C4867}" name="SFZeroModule">
+      <GROUP id="{205BF6CB-9EB5-94E7-7736-0DFC3A4B1394}" name="sfzero">
+        <GROUP id="{06F1954C-B90E-791A-6C99-4E5DAEDFB13C}" name="sf2-chunks">
+          <FILE id="QqcyHB" name="generators.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/sf2-chunks/generators.h"/>
+          <FILE id="BMZSaO" name="ibag.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/sf2-chunks/ibag.h"/>
+          <FILE id="FWxx2C" name="igen.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/sf2-chunks/igen.h"/>
+          <FILE id="P3iZnr" name="imod.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/sf2-chunks/imod.h"/>
+          <FILE id="fqVfF2" name="inst.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/sf2-chunks/inst.h"/>
+          <FILE id="y4s31w" name="iver.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/sf2-chunks/iver.h"/>
+          <FILE id="psegjp" name="pbag.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/sf2-chunks/pbag.h"/>
+          <FILE id="rRCmIf" name="pgen.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/sf2-chunks/pgen.h"/>
+          <FILE id="NvAVSZ" name="phdr.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/sf2-chunks/phdr.h"/>
+          <FILE id="Klbdam" name="pmod.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/sf2-chunks/pmod.h"/>
+          <FILE id="f7JjNY" name="shdr.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/sf2-chunks/shdr.h"/>
+        </GROUP>
+        <FILE id="dxENz1" name="RIFF.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/RIFF.cpp"/>
+        <FILE id="WLUf6l" name="RIFF.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/RIFF.h"/>
+        <FILE id="XlKr69" name="SF2.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/SF2.cpp"/>
+        <FILE id="gqvNmx" name="SF2.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SF2.h"/>
+        <FILE id="zvGxNH" name="SF2Generator.cpp" compile="1" resource="0"
+              file="Source/SFZeroModule/sfzero/SF2Generator.cpp"/>
+        <FILE id="vNT8Rn" name="SF2Generator.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SF2Generator.h"/>
+        <FILE id="RkxiSy" name="SF2Reader.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/SF2Reader.cpp"/>
+        <FILE id="WlArMR" name="SF2Reader.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SF2Reader.h"/>
+        <FILE id="yT3DN2" name="SF2Sound.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/SF2Sound.cpp"/>
+        <FILE id="L8Iu0G" name="SF2Sound.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SF2Sound.h"/>
+        <FILE id="PLEmWI" name="SF2WinTypes.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SF2WinTypes.h"/>
+        <FILE id="qhGfiP" name="SFZCommon.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZCommon.h"/>
+        <FILE id="kFhRlA" name="SFZDebug.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/SFZDebug.cpp"/>
+        <FILE id="tfiVIc" name="SFZDebug.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZDebug.h"/>
+        <FILE id="YYw6MU" name="SFZEG.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/SFZEG.cpp"/>
+        <FILE id="uuPyy8" name="SFZEG.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZEG.h"/>
+        <FILE id="veooTE" name="SFZReader.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/SFZReader.cpp"/>
+        <FILE id="Fil9BA" name="SFZReader.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZReader.h"/>
+        <FILE id="bRkzF4" name="SFZRegion.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/SFZRegion.cpp"/>
+        <FILE id="P3LaoQ" name="SFZRegion.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZRegion.h"/>
+        <FILE id="kZLXDN" name="SFZSample.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/SFZSample.cpp"/>
+        <FILE id="ToCfjc" name="SFZSample.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZSample.h"/>
+        <FILE id="kRYveX" name="SFZSound.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/SFZSound.cpp"/>
+        <FILE id="hkRd4Y" name="SFZSound.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZSound.h"/>
+        <FILE id="t92fDi" name="SFZSynth.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/SFZSynth.cpp"/>
+        <FILE id="a8hlwn" name="SFZSynth.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZSynth.h"/>
+        <FILE id="O2aCh7" name="SFZVoice.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/SFZVoice.cpp"/>
+        <FILE id="EIIA4P" name="SFZVoice.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZVoice.h"/>
+      </GROUP>
+      <FILE id="dymG1H" name="SFZero.cpp" compile="1" resource="0" file="Source/SFZeroModule/SFZero.cpp"/>
+      <FILE id="PXsEfn" name="SFZero.h" compile="0" resource="0" file="Source/SFZeroModule/SFZero.h"/>
+    </GROUP>
+    <GROUP id="{A10A5F2B-1257-75ED-C402-9A4618509CA7}" name="Source">
+      <FILE id="CVgrkY" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="gHWHsE" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"/>
+  <EXPORTFORMATS>
+    <ANDROIDSTUDIO targetFolder="Builds/Android">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="Juce4Unity_Sampler"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="Juce4Unity_Sampler"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../JUCE/modules"/>
+      </MODULEPATHS>
+    </ANDROIDSTUDIO>
+    <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="Juce4Unity_Sampler"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="Juce4Unity_Sampler"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../JUCE/modules"/>
+      </MODULEPATHS>
+    </LINUX_MAKE>
+    <VS2022 targetFolder="Builds/VisualStudio2022">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="Juce4Unity_Sampler"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="Juce4Unity_Sampler"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../JUCE/modules"/>
+      </MODULEPATHS>
+    </VS2022>
+    <XCODE_IPHONE targetFolder="Builds/iOS">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="Juce4Unity_Sampler"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="Juce4Unity_Sampler"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../JUCE/modules"/>
+      </MODULEPATHS>
+    </XCODE_IPHONE>
+    <XCODE_MAC targetFolder="Builds/MacOSX">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="Juce4Unity_Sampler"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="Juce4Unity_Sampler"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../JUCE/modules"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+  </MODULES>
+</JUCERPROJECT>
