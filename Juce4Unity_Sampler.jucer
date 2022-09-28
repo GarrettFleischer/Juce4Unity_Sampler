@@ -55,8 +55,6 @@
         <FILE id="dymG1H" name="SFZero.cpp" compile="1" resource="0" file="Source/SFZeroModule/SFZero.cpp"/>
         <FILE id="PXsEfn" name="SFZero.h" compile="0" resource="0" file="Source/SFZeroModule/SFZero.h"/>
       </GROUP>
-      <FILE id="UUBnJo" name="External.cpp" compile="1" resource="0" file="Source/External.cpp"/>
-      <FILE id="TxqWju" name="External.h" compile="0" resource="0" file="Source/External.h"/>
       <FILE id="CVgrkY" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="gHWHsE" name="PluginProcessor.h" compile="0" resource="0"

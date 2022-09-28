@@ -25,8 +25,6 @@ class Juce4Unity_SamplerAudioProcessor :
 #endif
 {
 public:
-    static juce::Array<Juce4Unity_SamplerAudioProcessor*> instances;
-
     //==============================================================================
     Juce4Unity_SamplerAudioProcessor();
     ~Juce4Unity_SamplerAudioProcessor() override;
@@ -82,8 +80,6 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Juce4Unity_SamplerAudioProcessor)
 };
-
-juce::Array<Juce4Unity_SamplerAudioProcessor*> Juce4Unity_SamplerAudioProcessor::instances;
 
 
 //==============================================================================

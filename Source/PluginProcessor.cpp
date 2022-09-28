@@ -22,8 +22,6 @@ Juce4Unity_SamplerAudioProcessor::Juce4Unity_SamplerAudioProcessor()
     )
 #endif
 {
-    instances.add(this);
-
     manager.registerBasicFormats();
 
     for (int i = 0; i < 128; ++i)
@@ -42,7 +40,6 @@ Juce4Unity_SamplerAudioProcessor::Juce4Unity_SamplerAudioProcessor()
 
 Juce4Unity_SamplerAudioProcessor::~Juce4Unity_SamplerAudioProcessor()
 {
-    instances.remove(instances.indexOf(this));
     disconnect();
 }
 
