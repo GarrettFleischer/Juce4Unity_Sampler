@@ -10,104 +10,44 @@
 
 //==============================================================================
 Juce4Unity_SamplerAudioProcessor::Juce4Unity_SamplerAudioProcessor()
+    :
 #ifndef JucePlugin_PreferredChannelConfigurations
-     : AudioProcessor (BusesProperties()
-                     #if ! JucePlugin_IsMidiEffect
-                      #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
-                      #endif
-                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
-                     #endif
-                       )
+    AudioProcessor(BusesProperties()
+#if ! JucePlugin_IsMidiEffect
+#if ! JucePlugin_IsSynth
+        .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
+#endif
+        .withOutput("Output", juce::AudioChannelSet::stereo(), true)
+#endif
+    )
 #endif
 {
-    juce::AudioFormatManager manager;
+    instances.add(this);
+
     manager.registerBasicFormats();
-    
+
     for (int i = 0; i < 128; ++i)
     {
         synth.addVoice(new sfzero::Voice());
     }
-    
-    auto sfzFile = juce::File("E:\\Downloads\\UprightPianoKW-SFZ-20220221\\UprightPianoKW-20220221.sfz");
-    auto sound = new sfzero::Sound(sfzFile);
-    sound->loadRegions();
-    sound->loadSamples(&manager);
-    
-    synth.clearSounds();
-    synth.addSound(sound);
 
-    startTimer(1000);
+    if(connect(6448))
+    {
+        OSCReceiver::addListener(this, "/Juce4Unity/LoadInstrument");
+        OSCReceiver::addListener(this, "/Juce4Unity/NoteOn");
+        OSCReceiver::addListener(this, "/Juce4Unity/NoteOff");
+        OSCReceiver::addListener(this, "/Juce4Unity/AllNotesOff");
+    }
 }
 
 Juce4Unity_SamplerAudioProcessor::~Juce4Unity_SamplerAudioProcessor()
 {
+    instances.remove(instances.indexOf(this));
+    disconnect();
 }
 
 //==============================================================================
-const juce::String Juce4Unity_SamplerAudioProcessor::getName() const
-{
-    return JucePlugin_Name;
-}
-
-bool Juce4Unity_SamplerAudioProcessor::acceptsMidi() const
-{
-   #if JucePlugin_WantsMidiInput
-    return true;
-   #else
-    return false;
-   #endif
-}
-
-bool Juce4Unity_SamplerAudioProcessor::producesMidi() const
-{
-   #if JucePlugin_ProducesMidiOutput
-    return true;
-   #else
-    return false;
-   #endif
-}
-
-bool Juce4Unity_SamplerAudioProcessor::isMidiEffect() const
-{
-   #if JucePlugin_IsMidiEffect
-    return true;
-   #else
-    return false;
-   #endif
-}
-
-double Juce4Unity_SamplerAudioProcessor::getTailLengthSeconds() const
-{
-    return 0.0;
-}
-
-int Juce4Unity_SamplerAudioProcessor::getNumPrograms()
-{
-    return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
-                // so this should be at least 1, even if you're not really implementing programs.
-}
-
-int Juce4Unity_SamplerAudioProcessor::getCurrentProgram()
-{
-    return 0;
-}
-
-void Juce4Unity_SamplerAudioProcessor::setCurrentProgram (int index)
-{
-}
-
-const juce::String Juce4Unity_SamplerAudioProcessor::getProgramName (int index)
-{
-    return {};
-}
-
-void Juce4Unity_SamplerAudioProcessor::changeProgramName (int index, const juce::String& newName)
-{
-}
-
-//==============================================================================
-void Juce4Unity_SamplerAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void Juce4Unity_SamplerAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
@@ -121,80 +61,57 @@ void Juce4Unity_SamplerAudioProcessor::releaseResources()
     // spare memory, etc.
 }
 
-#ifndef JucePlugin_PreferredChannelConfigurations
-bool Juce4Unity_SamplerAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+void Juce4Unity_SamplerAudioProcessor::loadInstrument(juce::File sfzFile)
 {
-  #if JucePlugin_IsMidiEffect
-    juce::ignoreUnused (layouts);
-    return true;
-  #else
-    // This is the place where you check if the layout is supported.
-    // In this template code we only support mono or stereo.
-    // Some plugin hosts, such as certain GarageBand versions, will only
-    // load plugins that support stereo bus layouts.
-    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
-     && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
-        return false;
+    const auto sound = new sfzero::Sound(sfzFile);
+    sound->loadRegions();
+    sound->loadSamples(&manager);
 
-    // This checks if the input layout matches the output layout
-   #if ! JucePlugin_IsSynth
-    if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
-        return false;
-   #endif
-
-    return true;
-  #endif
-}
-#endif
-
-void Juce4Unity_SamplerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
-{
-    juce::ScopedNoDenormals noDenormals;
-    
-    buffer.clear();
-    synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+    synth.clearSounds();
+    synth.addSound(sound);
 }
 
-//==============================================================================
-bool Juce4Unity_SamplerAudioProcessor::hasEditor() const
+void Juce4Unity_SamplerAudioProcessor::noteOn(int channel, int midi, float velocity)
 {
-    return true; // (change this to false if you choose to not supply an editor)
+    synth.noteOn(channel, midi, velocity);
 }
 
-juce::AudioProcessorEditor* Juce4Unity_SamplerAudioProcessor::createEditor()
+void Juce4Unity_SamplerAudioProcessor::noteOff(int channel, int midi)
 {
-    return new juce::GenericAudioProcessorEditor (*this);
+    synth.noteOff(channel, midi, 0.0f, false);
 }
 
-//==============================================================================
-void Juce4Unity_SamplerAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
+void Juce4Unity_SamplerAudioProcessor::allNotesOff(int channel)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
+    synth.allNotesOff(channel, false);
 }
 
-void Juce4Unity_SamplerAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+void Juce4Unity_SamplerAudioProcessor::oscMessageReceived(const juce::OSCMessage& message)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
-}
-
-void Juce4Unity_SamplerAudioProcessor::hiResTimerCallback()
-{
-    // if(playingNotes)
-    // {
-    // }
-    // else
-    // {
-        // synth.allNotesOff(1, false);
-        synth.noteOn(1, 60, random.nextFloat());
-        synth.noteOn(1, 62, random.nextFloat());
-        synth.noteOn(1, 65, random.nextFloat());
-        synth.noteOn(1, 67, random.nextFloat());
-    // }
-
-    // playingNotes = !playingNotes;
+    const auto pattern = message.getAddressPattern();
+    if (pattern == "/Juce4Unity/LoadInstrument")
+    {
+        const auto instrument = message[0].getString();
+        loadInstrument(instrument);
+    }
+    else if (pattern == "/Juce4Unity/NoteOn")
+    {
+        const auto channel = message[0].getInt32();
+        const auto midi = message[1].getInt32();
+        const auto velocity = message[2].getFloat32();
+        noteOn(channel, midi, velocity);
+    }
+    else if (pattern == "/Juce4Unity/NoteOff")
+    {
+        const auto channel = message[0].getInt32();
+        const auto midi = message[1].getInt32();
+        noteOff(channel, midi);
+    }
+    else if (pattern == "/Juce4Unity/AllNotesOff")
+    {
+        const auto channel = message[0].getInt32();
+        allNotesOff(channel);
+    }
 }
 
 //==============================================================================

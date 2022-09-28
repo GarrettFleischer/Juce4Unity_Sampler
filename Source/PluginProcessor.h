@@ -12,29 +12,34 @@
 
 #include "SFZeroModule/SFZero.h"
 
+
 //==============================================================================
 /**
 */
-class Juce4Unity_SamplerAudioProcessor  : public juce::AudioProcessor
-                            #if JucePlugin_Enable_ARA
+class Juce4Unity_SamplerAudioProcessor :
+    public juce::AudioProcessor,
+    juce::OSCReceiver,
+    juce::OSCReceiver::ListenerWithOSCAddress<juce::OSCReceiver::RealtimeCallback>
+#if JucePlugin_Enable_ARA
                              , public juce::AudioProcessorARAExtension
-                            #endif
-, juce::HighResolutionTimer
+#endif
 {
 public:
+    static juce::Array<Juce4Unity_SamplerAudioProcessor*> instances;
+
     //==============================================================================
     Juce4Unity_SamplerAudioProcessor();
     ~Juce4Unity_SamplerAudioProcessor() override;
 
     //==============================================================================
-    void prepareToPlay (double sampleRate, int samplesPerBlock) override;
+    void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
 
-   #ifndef JucePlugin_PreferredChannelConfigurations
-    bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
-   #endif
+#ifndef JucePlugin_PreferredChannelConfigurations
+    bool isBusesLayoutSupported(const BusesLayout& layouts) const override;
+#endif
 
-    void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
+    void processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
 
     //==============================================================================
     juce::AudioProcessorEditor* createEditor() override;
@@ -51,22 +56,154 @@ public:
     //==============================================================================
     int getNumPrograms() override;
     int getCurrentProgram() override;
-    void setCurrentProgram (int index) override;
-    const juce::String getProgramName (int index) override;
-    void changeProgramName (int index, const juce::String& newName) override;
+    void setCurrentProgram(int index) override;
+    const juce::String getProgramName(int index) override;
+    void changeProgramName(int index, const juce::String& newName) override;
 
     //==============================================================================
-    void getStateInformation (juce::MemoryBlock& destData) override;
-    void setStateInformation (const void* data, int sizeInBytes) override;
+    void getStateInformation(juce::MemoryBlock& destData) override;
+    void setStateInformation(const void* data, int sizeInBytes) override;
+
+    void loadInstrument(juce::File sfzFile);
+
+    void noteOn(int channel, int midi, float velocity);
+    void noteOff(int channel, int midi);
+
+    void allNotesOff(int channel);
 
 private:
-    juce::Random random;
+    juce::AudioFormatManager manager;
     sfzero::Synth synth;
 
-    bool playingNotes;
-    
-    void hiResTimerCallback() override;
-    
+    juce::Array<sfzero::Sound*> instruments;
+
+    void oscMessageReceived(const juce::OSCMessage& message) override;
+
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Juce4Unity_SamplerAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Juce4Unity_SamplerAudioProcessor)
 };
+
+juce::Array<Juce4Unity_SamplerAudioProcessor*> Juce4Unity_SamplerAudioProcessor::instances;
+
+
+//==============================================================================
+inline const juce::String Juce4Unity_SamplerAudioProcessor::getName() const
+{
+    return JucePlugin_Name;
+}
+
+inline bool Juce4Unity_SamplerAudioProcessor::acceptsMidi() const
+{
+#if JucePlugin_WantsMidiInput
+    return true;
+#else
+    return false;
+#endif
+}
+
+inline bool Juce4Unity_SamplerAudioProcessor::producesMidi() const
+{
+#if JucePlugin_ProducesMidiOutput
+    return true;
+#else
+    return false;
+#endif
+}
+
+inline bool Juce4Unity_SamplerAudioProcessor::isMidiEffect() const
+{
+#if JucePlugin_IsMidiEffect
+    return true;
+#else
+    return false;
+#endif
+}
+
+inline double Juce4Unity_SamplerAudioProcessor::getTailLengthSeconds() const
+{
+    return 0.0;
+}
+
+inline int Juce4Unity_SamplerAudioProcessor::getNumPrograms()
+{
+    return 1; // NB: some hosts don't cope very well if you tell them there are 0 programs,
+    // so this should be at least 1, even if you're not really implementing programs.
+}
+
+inline int Juce4Unity_SamplerAudioProcessor::getCurrentProgram()
+{
+    return 0;
+}
+
+inline void Juce4Unity_SamplerAudioProcessor::setCurrentProgram(int index)
+{
+}
+
+inline const juce::String Juce4Unity_SamplerAudioProcessor::getProgramName(int index)
+{
+    return {};
+}
+
+inline void Juce4Unity_SamplerAudioProcessor::changeProgramName(int index, const juce::String& newName)
+{
+}
+
+#ifndef JucePlugin_PreferredChannelConfigurations
+inline bool Juce4Unity_SamplerAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
+{
+#if JucePlugin_IsMidiEffect
+    juce::ignoreUnused (layouts);
+    return true;
+#else
+    // This is the place where you check if the layout is supported.
+    // In this template code we only support mono or stereo.
+    // Some plugin hosts, such as certain GarageBand versions, will only
+    // load plugins that support stereo bus layouts.
+    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
+        && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
+        return false;
+
+    // This checks if the input layout matches the output layout
+#if ! JucePlugin_IsSynth
+    if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
+        return false;
+#endif
+
+    return true;
+#endif
+}
+#endif
+
+inline void Juce4Unity_SamplerAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
+                                                           juce::MidiBuffer& midiMessages)
+{
+    juce::ScopedNoDenormals noDenormals;
+
+    buffer.clear();
+    synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+}
+
+//==============================================================================
+inline bool Juce4Unity_SamplerAudioProcessor::hasEditor() const
+{
+    return true; // (change this to false if you choose to not supply an editor)
+}
+
+inline juce::AudioProcessorEditor* Juce4Unity_SamplerAudioProcessor::createEditor()
+{
+    return new juce::GenericAudioProcessorEditor(*this);
+}
+
+//==============================================================================
+inline void Juce4Unity_SamplerAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
+{
+    // You should use this method to store your parameters in the memory block.
+    // You could do that either as raw data, or use the XML or ValueTree classes
+    // as intermediaries to make it easy to save and load complex data.
+}
+
+inline void Juce4Unity_SamplerAudioProcessor::setStateInformation(const void* data, int sizeInBytes)
+{
+    // You should use this method to restore your parameters from this memory block,
+    // whose contents will have been created by the getStateInformation() call.
+}
