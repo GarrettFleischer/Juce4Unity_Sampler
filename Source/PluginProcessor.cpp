@@ -29,18 +29,23 @@ Juce4Unity_SamplerAudioProcessor::Juce4Unity_SamplerAudioProcessor()
         synth.addVoice(new sfzero::Voice());
     }
 
-    if(connect(6448))
+    if (OSCReceiver::connect(6423))
     {
         OSCReceiver::addListener(this, "/Juce4Unity/LoadInstrument");
+        OSCReceiver::addListener(this, "/Juce4Unity/UnloadInstrument");
+        OSCReceiver::addListener(this, "/Juce4Unity/SetInstrument");
         OSCReceiver::addListener(this, "/Juce4Unity/NoteOn");
         OSCReceiver::addListener(this, "/Juce4Unity/NoteOff");
         OSCReceiver::addListener(this, "/Juce4Unity/AllNotesOff");
+
+        OSCSender::connect("localhost", 6448);
     }
 }
 
 Juce4Unity_SamplerAudioProcessor::~Juce4Unity_SamplerAudioProcessor()
 {
-    disconnect();
+    OSCReceiver::disconnect();
+    OSCSender::disconnect();
 }
 
 //==============================================================================
@@ -66,6 +71,23 @@ void Juce4Unity_SamplerAudioProcessor::loadInstrument(juce::File sfzFile)
 
     synth.clearSounds();
     synth.addSound(sound);
+
+    instruments.set(nextInstrumentId, sound);
+
+    send("/Juce4Unity/InstrumentLoaded", nextInstrumentId);
+    ++nextInstrumentId;
+}
+
+void Juce4Unity_SamplerAudioProcessor::unloadInstrument(int id)
+{
+    instruments.remove(id);
+    synth.clearSounds();
+}
+
+void Juce4Unity_SamplerAudioProcessor::setInstrument(int id)
+{
+    synth.clearSounds();
+    synth.addSound(instruments[id]);
 }
 
 void Juce4Unity_SamplerAudioProcessor::noteOn(int channel, int midi, float velocity)
@@ -90,6 +112,16 @@ void Juce4Unity_SamplerAudioProcessor::oscMessageReceived(const juce::OSCMessage
     {
         const auto instrument = message[0].getString();
         loadInstrument(instrument);
+    }
+    else if (pattern == "/Juce4Unity/UnloadInstrument")
+    {
+        const auto id = message[0].getInt32();
+        unloadInstrument(id);
+    }
+    else if (pattern == "/Juce4Unity/SetInstrument")
+    {
+        const auto id = message[0].getInt32();
+        setInstrument(id);
     }
     else if (pattern == "/Juce4Unity/NoteOn")
     {

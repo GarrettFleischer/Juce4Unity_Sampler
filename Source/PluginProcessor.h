@@ -19,7 +19,8 @@
 class Juce4Unity_SamplerAudioProcessor :
     public juce::AudioProcessor,
     juce::OSCReceiver,
-    juce::OSCReceiver::ListenerWithOSCAddress<juce::OSCReceiver::RealtimeCallback>
+    juce::OSCReceiver::ListenerWithOSCAddress<juce::OSCReceiver::RealtimeCallback>,
+    juce::OSCSender
 #if JucePlugin_Enable_ARA
                              , public juce::AudioProcessorARAExtension
 #endif
@@ -63,6 +64,8 @@ public:
     void setStateInformation(const void* data, int sizeInBytes) override;
 
     void loadInstrument(juce::File sfzFile);
+    void unloadInstrument(int id);
+    void setInstrument(int id);
 
     void noteOn(int channel, int midi, float velocity);
     void noteOff(int channel, int midi);
@@ -73,7 +76,8 @@ private:
     juce::AudioFormatManager manager;
     sfzero::Synth synth;
 
-    juce::Array<sfzero::Sound*> instruments;
+    juce::HashMap<int, sfzero::Sound*> instruments;
+    int nextInstrumentId {0};
 
     void oscMessageReceived(const juce::OSCMessage& message) override;
 
