@@ -91,8 +91,11 @@ private:
     juce::AudioFormatManager manager;
     sfzero::Synth synth;
 
-    juce::HashMap<int, sfzero::Sound*> instruments;
+    juce::ReferenceCountedArray<juce::SynthesiserSound> instruments;
+    juce::HashMap<int, const juce::SynthesiserSound*> instrumentMap;
     int nextInstrumentId{0};
+
+    const juce::SynthesiserSound::Ptr getInstrumentForId(int id) const;
 
     void oscMessageReceived(const juce::OSCMessage& message) override;
 

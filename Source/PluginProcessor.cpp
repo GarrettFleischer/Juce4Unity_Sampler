@@ -29,6 +29,9 @@ Juce4Unity_SamplerAudioProcessor::Juce4Unity_SamplerAudioProcessor()
         synth.addVoice(new sfzero::Voice());
     }
 
+    synth.clearSounds();
+    synth.setNoteStealingEnabled(true);
+
     if (OSCReceiver::connect(6923))
     {
         OSCReceiver::addListener(this, OSCNoteOn);
@@ -71,10 +74,8 @@ void Juce4Unity_SamplerAudioProcessor::loadInstrument(juce::File sfzFile)
     sound->loadRegions();
     sound->loadSamples(&manager);
 
-    synth.clearSounds();
-    synth.addSound(sound);
-
-    instruments.set(nextInstrumentId, sound);
+    instruments.add(sound);
+    instrumentMap.set(nextInstrumentId, sound);
 
     send(OSCInstrumentLoaded, nextInstrumentId);
     ++nextInstrumentId;
@@ -82,19 +83,20 @@ void Juce4Unity_SamplerAudioProcessor::loadInstrument(juce::File sfzFile)
 
 void Juce4Unity_SamplerAudioProcessor::unloadInstrument(const int id)
 {
-    instruments.remove(id);
+    instruments.remove(instruments.indexOf(instrumentMap[id]));
+    instrumentMap.remove(id);
     synth.clearSounds();
 }
 
 void Juce4Unity_SamplerAudioProcessor::setInstrument(const int id)
 {
     synth.clearSounds();
-    synth.addSound(instruments[id]);
+    synth.addSound(getInstrumentForId(id));
 }
 
 void Juce4Unity_SamplerAudioProcessor::addInstrument(const int id)
 {
-    synth.addSound(instruments[id]);
+    synth.addSound(getInstrumentForId(id));
 }
 
 void Juce4Unity_SamplerAudioProcessor::clearInstruments()
@@ -115,6 +117,11 @@ void Juce4Unity_SamplerAudioProcessor::noteOff(const int channel, int midi)
 void Juce4Unity_SamplerAudioProcessor::allNotesOff(int channel)
 {
     synth.allNotesOff(channel, false);
+}
+
+const juce::SynthesiserSound::Ptr Juce4Unity_SamplerAudioProcessor::getInstrumentForId(int id) const
+{
+    return instruments[instruments.indexOf(instruments[id])];
 }
 
 void Juce4Unity_SamplerAudioProcessor::oscMessageReceived(const juce::OSCMessage& message)
