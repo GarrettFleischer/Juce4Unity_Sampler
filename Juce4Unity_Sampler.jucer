@@ -52,7 +52,6 @@
           <FILE id="O2aCh7" name="SFZVoice.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/SFZVoice.cpp"/>
           <FILE id="EIIA4P" name="SFZVoice.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZVoice.h"/>
         </GROUP>
-        <FILE id="dymG1H" name="SFZero.cpp" compile="1" resource="0" file="Source/SFZeroModule/SFZero.cpp"/>
         <FILE id="PXsEfn" name="SFZero.h" compile="0" resource="0" file="Source/SFZeroModule/SFZero.h"/>
       </GROUP>
       <FILE id="CVgrkY" name="PluginProcessor.cpp" compile="1" resource="0"
