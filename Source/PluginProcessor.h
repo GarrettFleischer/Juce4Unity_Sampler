@@ -66,6 +66,8 @@ public:
     void loadInstrument(juce::File sfzFile);
     void unloadInstrument(int id);
     void setInstrument(int id);
+    void addInstrument(int id);
+    void clearInstruments();
 
     void noteOn(int channel, int midi, float velocity);
     void noteOff(int channel, int midi);
@@ -73,11 +75,24 @@ public:
     void allNotesOff(int channel);
 
 private:
+    // receive
+    const juce::OSCAddress OSCNoteOn{"/Juce4Unity/NoteOn"};
+    const juce::OSCAddress OSCNoteOff{"/Juce4Unity/NoteOff"};
+    const juce::OSCAddress OSCAllNotesOff{"/Juce4Unity/AllNotesOff"};
+    const juce::OSCAddress OSCSetInstrument{"/Juce4Unity/SetInstrument"};
+    const juce::OSCAddress OSCAddInstrument{"/Juce4Unity/AddInstrument"};
+    const juce::OSCAddress OSCClearInstruments{"/Juce4Unity/ClearInstruments"};
+    const juce::OSCAddress OSCLoadInstrument{"/Juce4Unity/LoadInstrument"};
+    const juce::OSCAddress OSCUnloadInstrument{"/Juce4Unity/UnloadInstrument"};
+
+    // send
+    const juce::OSCAddressPattern OSCInstrumentLoaded{"/Juce4Unity/InstrumentLoaded"};
+
     juce::AudioFormatManager manager;
     sfzero::Synth synth;
 
     juce::HashMap<int, sfzero::Sound*> instruments;
-    int nextInstrumentId {0};
+    int nextInstrumentId{0};
 
     void oscMessageReceived(const juce::OSCMessage& message) override;
 

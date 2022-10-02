@@ -29,16 +29,18 @@ Juce4Unity_SamplerAudioProcessor::Juce4Unity_SamplerAudioProcessor()
         synth.addVoice(new sfzero::Voice());
     }
 
-    if (OSCReceiver::connect(6423))
+    if (OSCReceiver::connect(6923))
     {
-        OSCReceiver::addListener(this, "/Juce4Unity/LoadInstrument");
-        OSCReceiver::addListener(this, "/Juce4Unity/UnloadInstrument");
-        OSCReceiver::addListener(this, "/Juce4Unity/SetInstrument");
-        OSCReceiver::addListener(this, "/Juce4Unity/NoteOn");
-        OSCReceiver::addListener(this, "/Juce4Unity/NoteOff");
-        OSCReceiver::addListener(this, "/Juce4Unity/AllNotesOff");
+        OSCReceiver::addListener(this, OSCNoteOn);
+        OSCReceiver::addListener(this, OSCNoteOff);
+        OSCReceiver::addListener(this, OSCAllNotesOff);
+        OSCReceiver::addListener(this, OSCLoadInstrument);
+        OSCReceiver::addListener(this, OSCUnloadInstrument);
+        OSCReceiver::addListener(this, OSCSetInstrument);
+        OSCReceiver::addListener(this, OSCAddInstrument);
+        OSCReceiver::addListener(this, OSCClearInstruments);
 
-        OSCSender::connect("localhost", 6448);
+        OSCSender::connect("127.0.0.1", 6942);
     }
 }
 
@@ -74,28 +76,38 @@ void Juce4Unity_SamplerAudioProcessor::loadInstrument(juce::File sfzFile)
 
     instruments.set(nextInstrumentId, sound);
 
-    send("/Juce4Unity/InstrumentLoaded", nextInstrumentId);
+    send(OSCInstrumentLoaded, nextInstrumentId);
     ++nextInstrumentId;
 }
 
-void Juce4Unity_SamplerAudioProcessor::unloadInstrument(int id)
+void Juce4Unity_SamplerAudioProcessor::unloadInstrument(const int id)
 {
     instruments.remove(id);
     synth.clearSounds();
 }
 
-void Juce4Unity_SamplerAudioProcessor::setInstrument(int id)
+void Juce4Unity_SamplerAudioProcessor::setInstrument(const int id)
 {
     synth.clearSounds();
     synth.addSound(instruments[id]);
 }
 
-void Juce4Unity_SamplerAudioProcessor::noteOn(int channel, int midi, float velocity)
+void Juce4Unity_SamplerAudioProcessor::addInstrument(const int id)
+{
+    synth.addSound(instruments[id]);
+}
+
+void Juce4Unity_SamplerAudioProcessor::clearInstruments()
+{
+    synth.clearSounds();
+}
+
+void Juce4Unity_SamplerAudioProcessor::noteOn(const int channel, const int midi, const float velocity)
 {
     synth.noteOn(channel, midi, velocity);
 }
 
-void Juce4Unity_SamplerAudioProcessor::noteOff(int channel, int midi)
+void Juce4Unity_SamplerAudioProcessor::noteOff(const int channel, int midi)
 {
     synth.noteOff(channel, midi, 0.0f, false);
 }
@@ -108,38 +120,47 @@ void Juce4Unity_SamplerAudioProcessor::allNotesOff(int channel)
 void Juce4Unity_SamplerAudioProcessor::oscMessageReceived(const juce::OSCMessage& message)
 {
     const auto pattern = message.getAddressPattern();
-    if (pattern == "/Juce4Unity/LoadInstrument")
-    {
-        const auto instrument = message[0].getString();
-        loadInstrument(instrument);
-    }
-    else if (pattern == "/Juce4Unity/UnloadInstrument")
-    {
-        const auto id = message[0].getInt32();
-        unloadInstrument(id);
-    }
-    else if (pattern == "/Juce4Unity/SetInstrument")
-    {
-        const auto id = message[0].getInt32();
-        setInstrument(id);
-    }
-    else if (pattern == "/Juce4Unity/NoteOn")
+    if (pattern.matches(OSCNoteOn))
     {
         const auto channel = message[0].getInt32();
         const auto midi = message[1].getInt32();
         const auto velocity = message[2].getFloat32();
         noteOn(channel, midi, velocity);
     }
-    else if (pattern == "/Juce4Unity/NoteOff")
+    else if (pattern.matches(OSCNoteOff))
     {
         const auto channel = message[0].getInt32();
         const auto midi = message[1].getInt32();
         noteOff(channel, midi);
     }
-    else if (pattern == "/Juce4Unity/AllNotesOff")
+    else if (pattern.matches(OSCAllNotesOff))
     {
         const auto channel = message[0].getInt32();
         allNotesOff(channel);
+    }
+    else if (pattern.matches(OSCSetInstrument))
+    {
+        const auto id = message[0].getInt32();
+        setInstrument(id);
+    }
+    else if (pattern.matches(OSCAddInstrument))
+    {
+        const auto id = message[0].getInt32();
+        addInstrument(id);
+    }
+    else if (pattern.matches(OSCClearInstruments))
+    {
+        clearInstruments();
+    }
+    else if (pattern.matches(OSCLoadInstrument))
+    {
+        const auto instrument = message[0].getString();
+        loadInstrument(instrument);
+    }
+    else if (pattern.matches(OSCUnloadInstrument))
+    {
+        const auto id = message[0].getInt32();
+        unloadInstrument(id);
     }
 }
 
