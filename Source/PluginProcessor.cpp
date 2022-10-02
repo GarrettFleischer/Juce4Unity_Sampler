@@ -42,6 +42,7 @@ Juce4Unity_SamplerAudioProcessor::Juce4Unity_SamplerAudioProcessor()
         OSCReceiver::addListener(this, OSCSetInstrument);
         OSCReceiver::addListener(this, OSCAddInstrument);
         OSCReceiver::addListener(this, OSCClearInstruments);
+        OSCReceiver::addListener(this, OSCReset);
 
         OSCSender::connect("127.0.0.1", 6942);
     }
@@ -119,6 +120,19 @@ void Juce4Unity_SamplerAudioProcessor::allNotesOff(int channel)
     synth.allNotesOff(channel, false);
 }
 
+void Juce4Unity_SamplerAudioProcessor::reset()
+{
+    instruments.clear();
+    instrumentMap.clear();
+    synth.clearSounds();
+    for (int i = 1; i <= 16; ++i)
+    {
+        synth.allNotesOff(i, false);
+    }
+    nextInstrumentId = 0;
+    AudioProcessor::reset();
+}
+
 const juce::SynthesiserSound::Ptr Juce4Unity_SamplerAudioProcessor::getInstrumentForId(int id) const
 {
     return instruments[instruments.indexOf(instruments[id])];
@@ -168,6 +182,10 @@ void Juce4Unity_SamplerAudioProcessor::oscMessageReceived(const juce::OSCMessage
     {
         const auto id = message[0].getInt32();
         unloadInstrument(id);
+    }
+    else if (pattern.matches(OSCReset))
+    {
+        reset();
     }
 }
 

@@ -74,6 +74,8 @@ public:
 
     void allNotesOff(int channel);
 
+    void reset() override;
+
 private:
     // receive
     const juce::OSCAddress OSCNoteOn{"/Juce4Unity/NoteOn"};
@@ -84,6 +86,7 @@ private:
     const juce::OSCAddress OSCClearInstruments{"/Juce4Unity/ClearInstruments"};
     const juce::OSCAddress OSCLoadInstrument{"/Juce4Unity/LoadInstrument"};
     const juce::OSCAddress OSCUnloadInstrument{"/Juce4Unity/UnloadInstrument"};
+    const juce::OSCAddress OSCReset{"/Juce4Unity/Reset"};
 
     // send
     const juce::OSCAddressPattern OSCInstrumentLoaded{"/Juce4Unity/InstrumentLoaded"};
