@@ -45,7 +45,7 @@ Juce4Unity_SamplerAudioProcessor::Juce4Unity_SamplerAudioProcessor()
         OSCReceiver::addListener(this, OSCReset);
         OSCReceiver::addListener(this, OSCRequestActiveInstruments);
 
-        if(!OSCSender::connect("127.0.0.1", 6942))
+        if (!OSCSender::connect("127.0.0.1", 6942))
         {
             OSCReceiver::disconnect();
             throw std::exception("Unable to connect to OSC sender");
@@ -97,6 +97,7 @@ void Juce4Unity_SamplerAudioProcessor::unloadInstrument(const int id)
     instrumentMap.remove(id);
     synth.clearSounds();
     activeInstruments.clear();
+    send(OSCInstrumentUnloaded);
 }
 
 void Juce4Unity_SamplerAudioProcessor::setInstrument(const int id)
@@ -105,18 +106,21 @@ void Juce4Unity_SamplerAudioProcessor::setInstrument(const int id)
     synth.addSound(getInstrumentForId(id));
     activeInstruments.clear();
     activeInstruments.add(id);
+    send(OSCInstrumentSet);
 }
 
 void Juce4Unity_SamplerAudioProcessor::addInstrument(const int id)
 {
     synth.addSound(getInstrumentForId(id));
     activeInstruments.add(id);
+    send(OSCInstrumentAdded);
 }
 
 void Juce4Unity_SamplerAudioProcessor::clearInstruments()
 {
     activeInstruments.clear();
     synth.clearSounds();
+    send(OSCInstrumentsCleared);
 }
 
 void Juce4Unity_SamplerAudioProcessor::noteOn(const int channel, const int midi, const float velocity)
@@ -146,6 +150,7 @@ void Juce4Unity_SamplerAudioProcessor::reset()
     }
     nextInstrumentId = 0;
     AudioProcessor::reset();
+    send(OSCResetComplete);
 }
 
 void Juce4Unity_SamplerAudioProcessor::returnActiveInstruments()

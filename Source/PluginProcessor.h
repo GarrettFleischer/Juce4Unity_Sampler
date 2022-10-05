@@ -93,7 +93,12 @@ private:
 
     // send
     const juce::OSCAddressPattern OSCInstrumentLoaded{"/Juce4Unity/InstrumentLoaded"};
+    const juce::OSCAddressPattern OSCInstrumentUnloaded{"/Juce4Unity/InstrumentUnloaded"};
+    const juce::OSCAddressPattern OSCInstrumentSet{"/Juce4Unity/InstrumentSet"};
+    const juce::OSCAddressPattern OSCInstrumentAdded{"/Juce4Unity/InstrumentAdded"};
+    const juce::OSCAddressPattern OSCInstrumentsCleared{"/Juce4Unity/InstrumentsCleared"};
     const juce::OSCAddressPattern OSCReturnActiveInstruments{"/Juce4Unity/ReturnActiveInstruments"};
+    const juce::OSCAddressPattern OSCResetComplete{"/Juce4Unity/ResetComplete"};
 
     juce::AudioFormatManager manager;
     sfzero::Synth synth;
