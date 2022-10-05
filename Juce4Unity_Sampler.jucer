@@ -22,34 +22,34 @@
             <FILE id="Klbdam" name="pmod.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/sf2-chunks/pmod.h"/>
             <FILE id="f7JjNY" name="shdr.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/sf2-chunks/shdr.h"/>
           </GROUP>
-          <FILE id="dxENz1" name="RIFF.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/RIFF.cpp"/>
+          <FILE id="dxENz1" name="RIFF.cpp" compile="0" resource="0" file="Source/SFZeroModule/sfzero/RIFF.cpp"/>
           <FILE id="WLUf6l" name="RIFF.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/RIFF.h"/>
-          <FILE id="XlKr69" name="SF2.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/SF2.cpp"/>
+          <FILE id="XlKr69" name="SF2.cpp" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SF2.cpp"/>
           <FILE id="gqvNmx" name="SF2.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SF2.h"/>
-          <FILE id="zvGxNH" name="SF2Generator.cpp" compile="1" resource="0"
+          <FILE id="zvGxNH" name="SF2Generator.cpp" compile="0" resource="0"
                 file="Source/SFZeroModule/sfzero/SF2Generator.cpp"/>
           <FILE id="vNT8Rn" name="SF2Generator.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SF2Generator.h"/>
-          <FILE id="RkxiSy" name="SF2Reader.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/SF2Reader.cpp"/>
+          <FILE id="RkxiSy" name="SF2Reader.cpp" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SF2Reader.cpp"/>
           <FILE id="WlArMR" name="SF2Reader.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SF2Reader.h"/>
-          <FILE id="yT3DN2" name="SF2Sound.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/SF2Sound.cpp"/>
+          <FILE id="yT3DN2" name="SF2Sound.cpp" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SF2Sound.cpp"/>
           <FILE id="L8Iu0G" name="SF2Sound.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SF2Sound.h"/>
           <FILE id="PLEmWI" name="SF2WinTypes.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SF2WinTypes.h"/>
           <FILE id="qhGfiP" name="SFZCommon.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZCommon.h"/>
-          <FILE id="kFhRlA" name="SFZDebug.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/SFZDebug.cpp"/>
+          <FILE id="kFhRlA" name="SFZDebug.cpp" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZDebug.cpp"/>
           <FILE id="tfiVIc" name="SFZDebug.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZDebug.h"/>
-          <FILE id="YYw6MU" name="SFZEG.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/SFZEG.cpp"/>
+          <FILE id="YYw6MU" name="SFZEG.cpp" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZEG.cpp"/>
           <FILE id="uuPyy8" name="SFZEG.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZEG.h"/>
-          <FILE id="veooTE" name="SFZReader.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/SFZReader.cpp"/>
+          <FILE id="veooTE" name="SFZReader.cpp" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZReader.cpp"/>
           <FILE id="Fil9BA" name="SFZReader.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZReader.h"/>
-          <FILE id="bRkzF4" name="SFZRegion.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/SFZRegion.cpp"/>
+          <FILE id="bRkzF4" name="SFZRegion.cpp" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZRegion.cpp"/>
           <FILE id="P3LaoQ" name="SFZRegion.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZRegion.h"/>
-          <FILE id="kZLXDN" name="SFZSample.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/SFZSample.cpp"/>
+          <FILE id="kZLXDN" name="SFZSample.cpp" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZSample.cpp"/>
           <FILE id="ToCfjc" name="SFZSample.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZSample.h"/>
-          <FILE id="kRYveX" name="SFZSound.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/SFZSound.cpp"/>
+          <FILE id="kRYveX" name="SFZSound.cpp" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZSound.cpp"/>
           <FILE id="hkRd4Y" name="SFZSound.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZSound.h"/>
-          <FILE id="t92fDi" name="SFZSynth.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/SFZSynth.cpp"/>
+          <FILE id="t92fDi" name="SFZSynth.cpp" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZSynth.cpp"/>
           <FILE id="a8hlwn" name="SFZSynth.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZSynth.h"/>
-          <FILE id="O2aCh7" name="SFZVoice.cpp" compile="1" resource="0" file="Source/SFZeroModule/sfzero/SFZVoice.cpp"/>
+          <FILE id="O2aCh7" name="SFZVoice.cpp" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZVoice.cpp"/>
           <FILE id="EIIA4P" name="SFZVoice.h" compile="0" resource="0" file="Source/SFZeroModule/sfzero/SFZVoice.h"/>
         </GROUP>
         <FILE id="dymG1H" name="SFZero.cpp" compile="1" resource="0" file="Source/SFZeroModule/SFZero.cpp"/>
