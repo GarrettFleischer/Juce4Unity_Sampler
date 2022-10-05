@@ -45,7 +45,15 @@ Juce4Unity_SamplerAudioProcessor::Juce4Unity_SamplerAudioProcessor()
         OSCReceiver::addListener(this, OSCReset);
         OSCReceiver::addListener(this, OSCRequestActiveInstruments);
 
-        OSCSender::connect("127.0.0.1", 6942);
+        if(!OSCSender::connect("127.0.0.1", 6942))
+        {
+            OSCReceiver::disconnect();
+            throw std::exception("Unable to connect to OSC sender");
+        }
+    }
+    else
+    {
+        throw std::exception("Unable to connect to OSC listener");
     }
 }
 
