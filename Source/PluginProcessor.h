@@ -64,9 +64,8 @@ public:
     void setStateInformation(const void* data, int sizeInBytes) override;
 
     void loadInstrument(juce::File sfzFile);
-    void unloadInstrument(int id);
-    void setInstrument(int id);
-    void addInstrument(int id);
+    void unloadInstrument(const juce::String& path);
+    void setInstrument(const juce::String& path);
     void clearInstruments();
 
     void noteOn(int channel, int midi, float velocity);
@@ -76,28 +75,22 @@ public:
 
     void reset() override;
 
-    void returnActiveInstruments();
-
 private:
     // receive
     const juce::OSCAddress OSCNoteOn{"/Juce4Unity/NoteOn"};
     const juce::OSCAddress OSCNoteOff{"/Juce4Unity/NoteOff"};
     const juce::OSCAddress OSCAllNotesOff{"/Juce4Unity/AllNotesOff"};
     const juce::OSCAddress OSCSetInstrument{"/Juce4Unity/SetInstrument"};
-    const juce::OSCAddress OSCAddInstrument{"/Juce4Unity/AddInstrument"};
     const juce::OSCAddress OSCClearInstruments{"/Juce4Unity/ClearInstruments"};
     const juce::OSCAddress OSCLoadInstrument{"/Juce4Unity/LoadInstrument"};
     const juce::OSCAddress OSCUnloadInstrument{"/Juce4Unity/UnloadInstrument"};
-    const juce::OSCAddress OSCRequestActiveInstruments{"/Juce4Unity/RequestActiveInstruments"};
     const juce::OSCAddress OSCReset{"/Juce4Unity/Reset"};
 
     // send
     const juce::OSCAddressPattern OSCInstrumentLoaded{"/Juce4Unity/InstrumentLoaded"};
     const juce::OSCAddressPattern OSCInstrumentUnloaded{"/Juce4Unity/InstrumentUnloaded"};
     const juce::OSCAddressPattern OSCInstrumentSet{"/Juce4Unity/InstrumentSet"};
-    const juce::OSCAddressPattern OSCInstrumentAdded{"/Juce4Unity/InstrumentAdded"};
     const juce::OSCAddressPattern OSCInstrumentsCleared{"/Juce4Unity/InstrumentsCleared"};
-    const juce::OSCAddressPattern OSCReturnActiveInstruments{"/Juce4Unity/ReturnActiveInstruments"};
     const juce::OSCAddressPattern OSCResetComplete{"/Juce4Unity/ResetComplete"};
 
     juce::AudioFormatManager manager;
@@ -106,11 +99,9 @@ private:
     juce::CriticalSection instrumentLock;
     
     juce::ReferenceCountedArray<juce::SynthesiserSound> instruments;
-    juce::HashMap<int, const juce::SynthesiserSound*> instrumentMap;
-    juce::Array<int> activeInstruments;
-    int nextInstrumentId{0};
+    juce::HashMap<juce::String, const juce::SynthesiserSound*> instrumentMap;
 
-    const juce::SynthesiserSound::Ptr getInstrumentForId(int id) const;
+    const juce::SynthesiserSound::Ptr getInstrumentForPath(const juce::String& path) const;
 
     void oscMessageReceived(const juce::OSCMessage& message) override;
 

@@ -40,10 +40,8 @@ Juce4Unity_SamplerAudioProcessor::Juce4Unity_SamplerAudioProcessor()
         OSCReceiver::addListener(this, OSCLoadInstrument);
         OSCReceiver::addListener(this, OSCUnloadInstrument);
         OSCReceiver::addListener(this, OSCSetInstrument);
-        OSCReceiver::addListener(this, OSCAddInstrument);
         OSCReceiver::addListener(this, OSCClearInstruments);
         OSCReceiver::addListener(this, OSCReset);
-        OSCReceiver::addListener(this, OSCRequestActiveInstruments);
 
         if (!OSCSender::connect("127.0.0.1", 6942))
         {
@@ -63,7 +61,6 @@ Juce4Unity_SamplerAudioProcessor::~Juce4Unity_SamplerAudioProcessor()
     OSCSender::disconnect();
     instruments.clear();
     instrumentMap.clear();
-    activeInstruments.clear();
     synth.clearSounds();
     synth.clearVoices();
 }
@@ -91,44 +88,32 @@ void Juce4Unity_SamplerAudioProcessor::loadInstrument(juce::File sfzFile)
     sound->loadSamples(&manager);
 
     instruments.add(sound);
-    instrumentMap.set(nextInstrumentId, sound);
+    const auto& path = sfzFile.getFullPathName();
+    instrumentMap.set(path, sound);
 
-    send(OSCInstrumentLoaded, nextInstrumentId);
-    ++nextInstrumentId;
+    send(OSCInstrumentLoaded, path);
 }
 
-void Juce4Unity_SamplerAudioProcessor::unloadInstrument(const int id)
+void Juce4Unity_SamplerAudioProcessor::unloadInstrument(const juce::String& path)
 {
     auto l = juce::ScopedLock(instrumentLock);
-    instruments.remove(instruments.indexOf(instrumentMap[id]));
-    instrumentMap.remove(id);
+    instruments.remove(instruments.indexOf(instrumentMap[path]));
+    instrumentMap.remove(path);
     synth.clearSounds();
-    activeInstruments.clear();
     send(OSCInstrumentUnloaded);
 }
 
-void Juce4Unity_SamplerAudioProcessor::setInstrument(const int id)
+void Juce4Unity_SamplerAudioProcessor::setInstrument(const juce::String& path)
 {
     auto l = juce::ScopedLock(instrumentLock);
     synth.clearSounds();
-    synth.addSound(getInstrumentForId(id));
-    activeInstruments.clear();
-    activeInstruments.add(id);
+    synth.addSound(getInstrumentForPath(path));
     send(OSCInstrumentSet);
-}
-
-void Juce4Unity_SamplerAudioProcessor::addInstrument(const int id)
-{
-    auto l = juce::ScopedLock(instrumentLock);
-    synth.addSound(getInstrumentForId(id));
-    activeInstruments.add(id);
-    send(OSCInstrumentAdded);
 }
 
 void Juce4Unity_SamplerAudioProcessor::clearInstruments()
 {
     auto l = juce::ScopedLock(instrumentLock);
-    activeInstruments.clear();
     synth.clearSounds();
     send(OSCInstrumentsCleared);
 }
@@ -153,34 +138,19 @@ void Juce4Unity_SamplerAudioProcessor::reset()
     auto l = juce::ScopedLock(instrumentLock);
     instruments.clear();
     instrumentMap.clear();
-    activeInstruments.clear();
     synth.clearSounds();
     for (int i = 1; i <= 16; ++i)
     {
         synth.allNotesOff(i, false);
     }
-    nextInstrumentId = 0;
     AudioProcessor::reset();
     send(OSCResetComplete);
 }
 
-void Juce4Unity_SamplerAudioProcessor::returnActiveInstruments()
+const juce::SynthesiserSound::Ptr Juce4Unity_SamplerAudioProcessor::getInstrumentForPath(const juce::String& path) const
 {
     auto l = juce::ScopedLock(instrumentLock);
-    auto message = juce::OSCMessage(OSCReturnActiveInstruments);
-
-    for (const int activeInstrument : activeInstruments)
-    {
-        message.addInt32(activeInstrument);
-    }
-
-    send(message);
-}
-
-const juce::SynthesiserSound::Ptr Juce4Unity_SamplerAudioProcessor::getInstrumentForId(int id) const
-{
-    auto l = juce::ScopedLock(instrumentLock);
-    return instruments[instruments.indexOf(instruments[id])];
+    return instruments[instruments.indexOf(instrumentMap[path])];
 }
 
 void Juce4Unity_SamplerAudioProcessor::oscMessageReceived(const juce::OSCMessage& message)
@@ -206,13 +176,8 @@ void Juce4Unity_SamplerAudioProcessor::oscMessageReceived(const juce::OSCMessage
     }
     else if (pattern.matches(OSCSetInstrument))
     {
-        const auto id = message[0].getInt32();
+        const auto id = message[0].getString();
         setInstrument(id);
-    }
-    else if (pattern.matches(OSCAddInstrument))
-    {
-        const auto id = message[0].getInt32();
-        addInstrument(id);
     }
     else if (pattern.matches(OSCClearInstruments))
     {
@@ -225,16 +190,12 @@ void Juce4Unity_SamplerAudioProcessor::oscMessageReceived(const juce::OSCMessage
     }
     else if (pattern.matches(OSCUnloadInstrument))
     {
-        const auto id = message[0].getInt32();
+        const auto id = message[0].getString();
         unloadInstrument(id);
     }
     else if (pattern.matches(OSCReset))
     {
         reset();
-    }
-    else if (pattern.matches(OSCRequestActiveInstruments))
-    {
-        returnActiveInstruments();
     }
 }
 
