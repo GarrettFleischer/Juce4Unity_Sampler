@@ -103,6 +103,8 @@ private:
     juce::AudioFormatManager manager;
     sfzero::Synth synth;
 
+    juce::CriticalSection instrumentLock;
+    
     juce::ReferenceCountedArray<juce::SynthesiserSound> instruments;
     juce::HashMap<int, const juce::SynthesiserSound*> instrumentMap;
     juce::Array<int> activeInstruments;

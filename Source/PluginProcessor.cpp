@@ -61,6 +61,11 @@ Juce4Unity_SamplerAudioProcessor::~Juce4Unity_SamplerAudioProcessor()
 {
     OSCReceiver::disconnect();
     OSCSender::disconnect();
+    instruments.clear();
+    instrumentMap.clear();
+    activeInstruments.clear();
+    synth.clearSounds();
+    synth.clearVoices();
 }
 
 //==============================================================================
@@ -80,6 +85,7 @@ void Juce4Unity_SamplerAudioProcessor::releaseResources()
 
 void Juce4Unity_SamplerAudioProcessor::loadInstrument(juce::File sfzFile)
 {
+    auto l = juce::ScopedLock(instrumentLock);
     const auto sound = new sfzero::Sound(sfzFile);
     sound->loadRegions();
     sound->loadSamples(&manager);
@@ -93,6 +99,7 @@ void Juce4Unity_SamplerAudioProcessor::loadInstrument(juce::File sfzFile)
 
 void Juce4Unity_SamplerAudioProcessor::unloadInstrument(const int id)
 {
+    auto l = juce::ScopedLock(instrumentLock);
     instruments.remove(instruments.indexOf(instrumentMap[id]));
     instrumentMap.remove(id);
     synth.clearSounds();
@@ -102,6 +109,7 @@ void Juce4Unity_SamplerAudioProcessor::unloadInstrument(const int id)
 
 void Juce4Unity_SamplerAudioProcessor::setInstrument(const int id)
 {
+    auto l = juce::ScopedLock(instrumentLock);
     synth.clearSounds();
     synth.addSound(getInstrumentForId(id));
     activeInstruments.clear();
@@ -111,6 +119,7 @@ void Juce4Unity_SamplerAudioProcessor::setInstrument(const int id)
 
 void Juce4Unity_SamplerAudioProcessor::addInstrument(const int id)
 {
+    auto l = juce::ScopedLock(instrumentLock);
     synth.addSound(getInstrumentForId(id));
     activeInstruments.add(id);
     send(OSCInstrumentAdded);
@@ -118,6 +127,7 @@ void Juce4Unity_SamplerAudioProcessor::addInstrument(const int id)
 
 void Juce4Unity_SamplerAudioProcessor::clearInstruments()
 {
+    auto l = juce::ScopedLock(instrumentLock);
     activeInstruments.clear();
     synth.clearSounds();
     send(OSCInstrumentsCleared);
@@ -140,6 +150,7 @@ void Juce4Unity_SamplerAudioProcessor::allNotesOff(int channel)
 
 void Juce4Unity_SamplerAudioProcessor::reset()
 {
+    auto l = juce::ScopedLock(instrumentLock);
     instruments.clear();
     instrumentMap.clear();
     activeInstruments.clear();
@@ -155,6 +166,7 @@ void Juce4Unity_SamplerAudioProcessor::reset()
 
 void Juce4Unity_SamplerAudioProcessor::returnActiveInstruments()
 {
+    auto l = juce::ScopedLock(instrumentLock);
     auto message = juce::OSCMessage(OSCReturnActiveInstruments);
 
     for (const int activeInstrument : activeInstruments)
@@ -167,6 +179,7 @@ void Juce4Unity_SamplerAudioProcessor::returnActiveInstruments()
 
 const juce::SynthesiserSound::Ptr Juce4Unity_SamplerAudioProcessor::getInstrumentForId(int id) const
 {
+    auto l = juce::ScopedLock(instrumentLock);
     return instruments[instruments.indexOf(instruments[id])];
 }
 
