@@ -43,6 +43,7 @@ Juce4Unity_SamplerAudioProcessor::Juce4Unity_SamplerAudioProcessor()
         OSCReceiver::addListener(this, OSCAddInstrument);
         OSCReceiver::addListener(this, OSCClearInstruments);
         OSCReceiver::addListener(this, OSCReset);
+        OSCReceiver::addListener(this, OSCRequestActiveInstruments);
 
         OSCSender::connect("127.0.0.1", 6942);
     }
@@ -87,21 +88,26 @@ void Juce4Unity_SamplerAudioProcessor::unloadInstrument(const int id)
     instruments.remove(instruments.indexOf(instrumentMap[id]));
     instrumentMap.remove(id);
     synth.clearSounds();
+    activeInstruments.clear();
 }
 
 void Juce4Unity_SamplerAudioProcessor::setInstrument(const int id)
 {
     synth.clearSounds();
     synth.addSound(getInstrumentForId(id));
+    activeInstruments.clear();
+    activeInstruments.add(id);
 }
 
 void Juce4Unity_SamplerAudioProcessor::addInstrument(const int id)
 {
     synth.addSound(getInstrumentForId(id));
+    activeInstruments.add(id);
 }
 
 void Juce4Unity_SamplerAudioProcessor::clearInstruments()
 {
+    activeInstruments.clear();
     synth.clearSounds();
 }
 
@@ -124,6 +130,7 @@ void Juce4Unity_SamplerAudioProcessor::reset()
 {
     instruments.clear();
     instrumentMap.clear();
+    activeInstruments.clear();
     synth.clearSounds();
     for (int i = 1; i <= 16; ++i)
     {
@@ -131,6 +138,18 @@ void Juce4Unity_SamplerAudioProcessor::reset()
     }
     nextInstrumentId = 0;
     AudioProcessor::reset();
+}
+
+void Juce4Unity_SamplerAudioProcessor::returnActiveInstruments()
+{
+    auto message = juce::OSCMessage(OSCReturnActiveInstruments);
+
+    for (const int activeInstrument : activeInstruments)
+    {
+        message.addInt32(activeInstrument);
+    }
+
+    send(message);
 }
 
 const juce::SynthesiserSound::Ptr Juce4Unity_SamplerAudioProcessor::getInstrumentForId(int id) const
@@ -186,6 +205,10 @@ void Juce4Unity_SamplerAudioProcessor::oscMessageReceived(const juce::OSCMessage
     else if (pattern.matches(OSCReset))
     {
         reset();
+    }
+    else if (pattern.matches(OSCRequestActiveInstruments))
+    {
+        returnActiveInstruments();
     }
 }
 

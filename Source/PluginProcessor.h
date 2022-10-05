@@ -76,6 +76,8 @@ public:
 
     void reset() override;
 
+    void returnActiveInstruments();
+
 private:
     // receive
     const juce::OSCAddress OSCNoteOn{"/Juce4Unity/NoteOn"};
@@ -86,16 +88,19 @@ private:
     const juce::OSCAddress OSCClearInstruments{"/Juce4Unity/ClearInstruments"};
     const juce::OSCAddress OSCLoadInstrument{"/Juce4Unity/LoadInstrument"};
     const juce::OSCAddress OSCUnloadInstrument{"/Juce4Unity/UnloadInstrument"};
+    const juce::OSCAddress OSCRequestActiveInstruments{"/Juce4Unity/RequestActiveInstruments"};
     const juce::OSCAddress OSCReset{"/Juce4Unity/Reset"};
 
     // send
     const juce::OSCAddressPattern OSCInstrumentLoaded{"/Juce4Unity/InstrumentLoaded"};
+    const juce::OSCAddressPattern OSCReturnActiveInstruments{"/Juce4Unity/ReturnActiveInstruments"};
 
     juce::AudioFormatManager manager;
     sfzero::Synth synth;
 
     juce::ReferenceCountedArray<juce::SynthesiserSound> instruments;
     juce::HashMap<int, const juce::SynthesiserSound*> instrumentMap;
+    juce::Array<int> activeInstruments;
     int nextInstrumentId{0};
 
     const juce::SynthesiserSound::Ptr getInstrumentForId(int id) const;
