@@ -63,7 +63,43 @@ public:
     void getStateInformation(juce::MemoryBlock& destData) override;
     void setStateInformation(const void* data, int sizeInBytes) override;
 
-    void loadInstrument(juce::File sfzFile);
+private:
+    // receive
+    const juce::OSCAddress OSCNoteOn{"/Juce4Unity/NoteOn"};
+    const juce::OSCAddress OSCNoteOff{"/Juce4Unity/NoteOff"};
+    const juce::OSCAddress OSCAllNotesOff{"/Juce4Unity/AllNotesOff"};
+    const juce::OSCAddress OSCSetGain{"/Juce4Unity/SetGain"};
+    const juce::OSCAddress OSCSetSampleRateForDevice{"/Juce4Unity/SetSampleRateForDevice"};
+    const juce::OSCAddress OSCSetInstrument{"/Juce4Unity/SetInstrument"};
+    const juce::OSCAddress OSCClearInstruments{"/Juce4Unity/ClearInstruments"};
+    const juce::OSCAddress OSCLoadInstrument{"/Juce4Unity/LoadInstrument"};
+    const juce::OSCAddress OSCUnloadInstrument{"/Juce4Unity/UnloadInstrument"};
+    const juce::OSCAddress OSCReset{"/Juce4Unity/Reset"};
+    const juce::OSCAddress OSCGetAvailableSampleRates{"/Juce4Unity/GetAvailableSampleRates"};
+    const juce::OSCAddress OSCGetAvailableDevices{"/Juce4Unity/GetAvailableDevices"};
+
+    // send
+    const juce::OSCAddressPattern OSCInstrumentLoaded{"/Juce4Unity/InstrumentLoaded"};
+    const juce::OSCAddressPattern OSCInstrumentUnloaded{"/Juce4Unity/InstrumentUnloaded"};
+    const juce::OSCAddressPattern OSCInstrumentSet{"/Juce4Unity/InstrumentSet"};
+    const juce::OSCAddressPattern OSCInstrumentsCleared{"/Juce4Unity/InstrumentsCleared"};
+    const juce::OSCAddressPattern OSCResetComplete{"/Juce4Unity/ResetComplete"};
+    const juce::OSCAddressPattern OSCAvailableSampleRates{"/Juce4Unity/AvailableSampleRates"};
+    const juce::OSCAddressPattern OSCAvailableDevices{"/Juce4Unity/AvailableDevices"};
+
+    float gain{1.0};
+
+    juce::AudioDeviceManager deviceManager;
+    juce::AudioFormatManager audioFormatManager;
+    sfzero::Synth synth;
+
+    juce::CriticalSection instrumentLock;
+    juce::ReferenceCountedArray<juce::SynthesiserSound> instruments;
+    juce::HashMap<juce::String, const juce::SynthesiserSound*> instrumentMap;
+
+    const juce::SynthesiserSound::Ptr getInstrumentForPath(const juce::String& path) const;
+
+    void loadInstrument(const juce::File& sfzFile);
     void unloadInstrument(const juce::String& path);
     void setInstrument(const juce::String& path);
     void clearInstruments();
@@ -75,33 +111,10 @@ public:
 
     void reset() override;
 
-private:
-    // receive
-    const juce::OSCAddress OSCNoteOn{"/Juce4Unity/NoteOn"};
-    const juce::OSCAddress OSCNoteOff{"/Juce4Unity/NoteOff"};
-    const juce::OSCAddress OSCAllNotesOff{"/Juce4Unity/AllNotesOff"};
-    const juce::OSCAddress OSCSetInstrument{"/Juce4Unity/SetInstrument"};
-    const juce::OSCAddress OSCClearInstruments{"/Juce4Unity/ClearInstruments"};
-    const juce::OSCAddress OSCLoadInstrument{"/Juce4Unity/LoadInstrument"};
-    const juce::OSCAddress OSCUnloadInstrument{"/Juce4Unity/UnloadInstrument"};
-    const juce::OSCAddress OSCReset{"/Juce4Unity/Reset"};
+    void setSampleRateForDevice(const juce::String& deviceName, double sampleRate);
 
-    // send
-    const juce::OSCAddressPattern OSCInstrumentLoaded{"/Juce4Unity/InstrumentLoaded"};
-    const juce::OSCAddressPattern OSCInstrumentUnloaded{"/Juce4Unity/InstrumentUnloaded"};
-    const juce::OSCAddressPattern OSCInstrumentSet{"/Juce4Unity/InstrumentSet"};
-    const juce::OSCAddressPattern OSCInstrumentsCleared{"/Juce4Unity/InstrumentsCleared"};
-    const juce::OSCAddressPattern OSCResetComplete{"/Juce4Unity/ResetComplete"};
-
-    juce::AudioFormatManager manager;
-    sfzero::Synth synth;
-
-    juce::CriticalSection instrumentLock;
-    
-    juce::ReferenceCountedArray<juce::SynthesiserSound> instruments;
-    juce::HashMap<juce::String, const juce::SynthesiserSound*> instrumentMap;
-
-    const juce::SynthesiserSound::Ptr getInstrumentForPath(const juce::String& path) const;
+    void getAvailableSampleRates();
+    void getAvailableDevices();
 
     void oscMessageReceived(const juce::OSCMessage& message) override;
 
@@ -197,15 +210,6 @@ inline bool Juce4Unity_SamplerAudioProcessor::isBusesLayoutSupported(const Buses
 #endif
 }
 #endif
-
-inline void Juce4Unity_SamplerAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
-                                                           juce::MidiBuffer& midiMessages)
-{
-    juce::ScopedNoDenormals noDenormals;
-
-    buffer.clear();
-    synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
-}
 
 //==============================================================================
 inline bool Juce4Unity_SamplerAudioProcessor::hasEditor() const

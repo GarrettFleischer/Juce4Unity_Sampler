@@ -22,7 +22,9 @@ Juce4Unity_SamplerAudioProcessor::Juce4Unity_SamplerAudioProcessor()
     )
 #endif
 {
-    manager.registerBasicFormats();
+    deviceManager.initialiseWithDefaultDevices(2, 2);
+
+    audioFormatManager.registerBasicFormats();
 
     for (int i = 0; i < 128; ++i)
     {
@@ -42,6 +44,10 @@ Juce4Unity_SamplerAudioProcessor::Juce4Unity_SamplerAudioProcessor()
         OSCReceiver::addListener(this, OSCSetInstrument);
         OSCReceiver::addListener(this, OSCClearInstruments);
         OSCReceiver::addListener(this, OSCReset);
+        OSCReceiver::addListener(this, OSCSetGain);
+        OSCReceiver::addListener(this, OSCSetSampleRateForDevice);
+        OSCReceiver::addListener(this, OSCGetAvailableSampleRates);
+        OSCReceiver::addListener(this, OSCGetAvailableDevices);
 
         if (!OSCSender::connect("127.0.0.1", 6942))
         {
@@ -68,10 +74,18 @@ Juce4Unity_SamplerAudioProcessor::~Juce4Unity_SamplerAudioProcessor()
 //==============================================================================
 void Juce4Unity_SamplerAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
-
     synth.setCurrentPlaybackSampleRate(sampleRate);
+    synth.setMinimumRenderingSubdivisionSize(samplesPerBlock);
+}
+
+void Juce4Unity_SamplerAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
+                                                    juce::MidiBuffer& midiMessages)
+{
+    juce::ScopedNoDenormals noDenormals;
+
+    buffer.clear();
+    synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+    buffer.applyGain(gain);
 }
 
 void Juce4Unity_SamplerAudioProcessor::releaseResources()
@@ -80,12 +94,12 @@ void Juce4Unity_SamplerAudioProcessor::releaseResources()
     // spare memory, etc.
 }
 
-void Juce4Unity_SamplerAudioProcessor::loadInstrument(juce::File sfzFile)
+void Juce4Unity_SamplerAudioProcessor::loadInstrument(const juce::File& sfzFile)
 {
     auto l = juce::ScopedLock(instrumentLock);
     const auto sound = new sfzero::Sound(sfzFile);
     sound->loadRegions();
-    sound->loadSamples(&manager);
+    sound->loadSamples(&audioFormatManager);
 
     instruments.add(sound);
     const auto& path = sfzFile.getFullPathName();
@@ -147,6 +161,46 @@ void Juce4Unity_SamplerAudioProcessor::reset()
     send(OSCResetComplete);
 }
 
+void Juce4Unity_SamplerAudioProcessor::setSampleRateForDevice(const juce::String& deviceName, const double sampleRate)
+{
+    auto setup = deviceManager.getAudioDeviceSetup();
+    setup.outputDeviceName = deviceName;
+    setup.sampleRate = sampleRate;
+    deviceManager.setAudioDeviceSetup(setup, true);
+}
+
+void Juce4Unity_SamplerAudioProcessor::getAvailableSampleRates()
+{
+    const auto currentDevice = deviceManager.getCurrentAudioDevice();
+    auto rates = currentDevice->getAvailableSampleRates();
+
+    auto message = juce::OSCMessage(OSCAvailableSampleRates);
+    message.addString(currentDevice->getTypeName());
+    message.addString(currentDevice->getName());
+
+    for (const auto rate : rates)
+    {
+        message.addString(juce::String(rate));
+    }
+    send(message);
+}
+
+void Juce4Unity_SamplerAudioProcessor::getAvailableDevices()
+{
+    auto message = juce::OSCMessage(OSCAvailableDevices);
+    for (const auto deviceType : deviceManager.getAvailableDeviceTypes())
+    {
+        message.addString(deviceType->getTypeName());
+        auto names = deviceType->getDeviceNames();
+        message.addInt32(names.size());
+        for (const auto& name : names)
+        {
+            message.addString(name);
+        }
+    }
+    send(message);
+}
+
 const juce::SynthesiserSound::Ptr Juce4Unity_SamplerAudioProcessor::getInstrumentForPath(const juce::String& path) const
 {
     auto l = juce::ScopedLock(instrumentLock);
@@ -196,6 +250,22 @@ void Juce4Unity_SamplerAudioProcessor::oscMessageReceived(const juce::OSCMessage
     else if (pattern.matches(OSCReset))
     {
         reset();
+    }
+    else if (pattern.matches(OSCSetGain))
+    {
+        gain = message[0].getFloat32();
+    }
+    else if (pattern.matches(OSCSetSampleRateForDevice))
+    {
+        setSampleRateForDevice(message[0].getString(), message[1].getString().getDoubleValue());
+    }
+    else if (pattern.matches(OSCGetAvailableSampleRates))
+    {
+        getAvailableSampleRates();
+    }
+    else if (pattern.matches(OSCGetAvailableDevices))
+    {
+        getAvailableDevices();
     }
 }
 
