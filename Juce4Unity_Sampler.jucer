@@ -2,9 +2,8 @@
 
 <JUCERPROJECT id="dW5X7B" name="Juce4Unity_Sampler" projectType="audioplug"
               useAppConfig="0" addUsingNamespaceToJuceHeader="0" displaySplashScreen="1"
-              jucerFormatVersion="1" pluginFormats="buildStandalone,buildUnity"
-              pluginCharacteristicsValue="pluginIsSynth" companyName="Ethinx"
-              companyCopyright="2022" cppLanguageStandard="17">
+              jucerFormatVersion="1" pluginFormats="buildUnity" pluginCharacteristicsValue="pluginIsSynth"
+              companyName="Ethinx" companyCopyright="2022" cppLanguageStandard="17">
   <MAINGROUP id="K57nX0" name="Juce4Unity_Sampler">
     <GROUP id="{A10A5F2B-1257-75ED-C402-9A4618509CA7}" name="Source">
       <GROUP id="{E3022A5C-EED3-638E-7E8B-BA5D683C4867}" name="SFZeroModule">
