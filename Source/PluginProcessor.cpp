@@ -75,7 +75,6 @@ Juce4Unity_SamplerAudioProcessor::~Juce4Unity_SamplerAudioProcessor()
 void Juce4Unity_SamplerAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
     synth.setCurrentPlaybackSampleRate(sampleRate);
-    synth.setMinimumRenderingSubdivisionSize(samplesPerBlock);
 }
 
 void Juce4Unity_SamplerAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
@@ -84,7 +83,8 @@ void Juce4Unity_SamplerAudioProcessor::processBlock(juce::AudioBuffer<float>& bu
     juce::ScopedNoDenormals noDenormals;
 
     buffer.clear();
-    synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+    const auto numSamples = buffer.getNumSamples();
+    synth.renderNextBlock(buffer, midiMessages, 0, numSamples);
     buffer.applyGain(gain);
 }
 
@@ -139,7 +139,7 @@ void Juce4Unity_SamplerAudioProcessor::noteOn(const int channel, const int midi,
 
 void Juce4Unity_SamplerAudioProcessor::noteOff(const int channel, int midi)
 {
-    synth.noteOff(channel, midi, 0.0f, false);
+    synth.noteOff(channel, midi, 0.0f, true);
 }
 
 void Juce4Unity_SamplerAudioProcessor::allNotesOff(int channel)
