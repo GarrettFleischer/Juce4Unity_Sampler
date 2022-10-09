@@ -22,8 +22,6 @@ Juce4Unity_SamplerAudioProcessor::Juce4Unity_SamplerAudioProcessor()
     )
 #endif
 {
-    deviceManager.initialiseWithDefaultDevices(2, 2);
-
     audioFormatManager.registerBasicFormats();
 
     for (int i = 0; i < 128; ++i)
@@ -134,46 +132,6 @@ void Juce4Unity_SamplerAudioProcessor::reset()
     }
     AudioProcessor::reset();
 }
-
-// void Juce4Unity_SamplerAudioProcessor::setSampleRateForDevice(const juce::String& deviceName, const double sampleRate)
-// {
-//     auto setup = deviceManager.getAudioDeviceSetup();
-//     setup.outputDeviceName = deviceName;
-//     setup.sampleRate = sampleRate;
-//     deviceManager.setAudioDeviceSetup(setup, true);
-// }
-
-// void Juce4Unity_SamplerAudioProcessor::getAvailableSampleRates()
-// {
-//     const auto currentDevice = deviceManager.getCurrentAudioDevice();
-//     auto rates = currentDevice->getAvailableSampleRates();
-//
-//     auto message = juce::OSCMessage(OSCAvailableSampleRates);
-//     message.addString(currentDevice->getTypeName());
-//     message.addString(currentDevice->getName());
-//
-//     for (const auto rate : rates)
-//     {
-//         message.addString(juce::String(rate));
-//     }
-//     send(message);
-// }
-
-// void Juce4Unity_SamplerAudioProcessor::getAvailableDevices()
-// {
-//     auto message = juce::OSCMessage(OSCAvailableDevices);
-//     for (const auto deviceType : deviceManager.getAvailableDeviceTypes())
-//     {
-//         message.addString(deviceType->getTypeName());
-//         auto names = deviceType->getDeviceNames();
-//         message.addInt32(names.size());
-//         for (const auto& name : names)
-//         {
-//             message.addString(name);
-//         }
-//     }
-//     send(message);
-// }
 
 const juce::SynthesiserSound::Ptr Juce4Unity_SamplerAudioProcessor::getInstrumentForPath(const juce::String& path) const
 {

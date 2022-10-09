@@ -73,7 +73,6 @@ public:
 private:
     float gain{1.0};
 
-    juce::AudioDeviceManager deviceManager;
     juce::AudioFormatManager audioFormatManager;
     sfzero::Synth synth;
 
@@ -82,11 +81,6 @@ private:
     juce::HashMap<juce::String, const juce::SynthesiserSound*> instrumentMap;
 
     const juce::SynthesiserSound::Ptr getInstrumentForPath(const juce::String& path) const;
-
-    // void setSampleRateForDevice(const juce::String& deviceName, double sampleRate);
-    //
-    // void getAvailableSampleRates();
-    // void getAvailableDevices();
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Juce4Unity_SamplerAudioProcessor)
@@ -184,12 +178,12 @@ inline bool Juce4Unity_SamplerAudioProcessor::isBusesLayoutSupported(const Buses
 //==============================================================================
 inline bool Juce4Unity_SamplerAudioProcessor::hasEditor() const
 {
-    return true; // (change this to false if you choose to not supply an editor)
+    return false; // (change this to false if you choose to not supply an editor)
 }
 
 inline juce::AudioProcessorEditor* Juce4Unity_SamplerAudioProcessor::createEditor()
 {
-    return new juce::GenericAudioProcessorEditor(*this);
+    return nullptr;
 }
 
 //==============================================================================
