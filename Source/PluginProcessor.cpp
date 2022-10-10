@@ -22,6 +22,11 @@ Juce4Unity_SamplerAudioProcessor::Juce4Unity_SamplerAudioProcessor()
     )
 #endif
 {
+    logger = juce::FileLogger::createDefaultAppLogger(
+        "Juce4UnitySampler",
+        "Juce4UnitySampler.log",
+        "################################################");
+
     audioFormatManager.registerBasicFormats();
 
     for (int i = 0; i < 128; ++i)
@@ -34,6 +39,7 @@ Juce4Unity_SamplerAudioProcessor::Juce4Unity_SamplerAudioProcessor()
 
     if (OSCReceiver::connect(6923))
     {
+        logMessage("Receiver connected to port 6923");
         OSCReceiver::addListener(this, OSCNoteOn);
         OSCReceiver::addListener(this, OSCNoteOff);
         OSCReceiver::addListener(this, OSCAllNotesOff);
@@ -44,10 +50,18 @@ Juce4Unity_SamplerAudioProcessor::Juce4Unity_SamplerAudioProcessor()
         OSCReceiver::addListener(this, OSCReset);
         OSCReceiver::addListener(this, OSCSetGain);
 
-        if (!OSCSender::connect("127.0.0.1", 6942))
+        if (OSCSender::connect("127.0.0.1", 6942))
         {
-            OSCReceiver::disconnect();
+            logMessage("Sender connected to port 6942");
         }
+        else
+        {
+            logMessage("Sender failed to connect to port 6942");
+        }
+    }
+    else
+    {
+        logMessage("Receiver failed to connect to port 6923");
     }
 }
 
@@ -59,6 +73,7 @@ Juce4Unity_SamplerAudioProcessor::~Juce4Unity_SamplerAudioProcessor()
     instrumentMap.clear();
     synth.clearSounds();
     synth.clearVoices();
+    delete logger;
 }
 
 //==============================================================================
@@ -88,6 +103,7 @@ void Juce4Unity_SamplerAudioProcessor::loadInstrument(const juce::String& sfzFil
 {
     try
     {
+        logMessage("Loading from file path: " + sfzFilePath);
         const auto sfzFile = juce::File(sfzFilePath);
         auto l = juce::ScopedLock(instrumentLock);
         const auto sound = new sfzero::Sound(sfzFile);
@@ -98,15 +114,26 @@ void Juce4Unity_SamplerAudioProcessor::loadInstrument(const juce::String& sfzFil
         const auto& path = sfzFile.getFullPathName();
         instrumentMap.set(path, sound);
 
-        send(OSCInstrumentLoaded, path);
+        if (!send(OSCInstrumentLoaded, path))
+        {
+            logMessage("Failed to send loadInstrument message");
+        }
     }
     catch (const std::exception& e)
     {
-        send(OSCLoadInstrumentError, sfzFilePath, juce::String(e.what()));
+        logMessage(e.what());
+        if (!send(OSCLoadInstrumentError, sfzFilePath, juce::String(e.what())))
+        {
+            logMessage("Failed to send error message");
+        }
     }
     catch (const char* e)
     {
-        send(OSCLoadInstrumentError, sfzFilePath, juce::String(e));
+        logMessage(e);
+        if (!send(OSCLoadInstrumentError, sfzFilePath, juce::String(e)))
+        {
+            logMessage("Failed to send error message");
+        }
     }
 }
 
@@ -116,7 +143,10 @@ void Juce4Unity_SamplerAudioProcessor::unloadInstrument(const juce::String& path
     instruments.remove(instruments.indexOf(instrumentMap[path]));
     instrumentMap.remove(path);
     synth.clearSounds();
-    send(OSCInstrumentUnloaded);
+    if (!send(OSCInstrumentUnloaded))
+    {
+        logMessage("Failed to send unloadInstrument message");
+    }
 }
 
 void Juce4Unity_SamplerAudioProcessor::setInstrument(const juce::String& path)
@@ -124,14 +154,20 @@ void Juce4Unity_SamplerAudioProcessor::setInstrument(const juce::String& path)
     auto l = juce::ScopedLock(instrumentLock);
     synth.clearSounds();
     synth.addSound(getInstrumentForPath(path));
-    send(OSCInstrumentSet);
+    if (!send(OSCInstrumentSet))
+    {
+        logMessage("Failed to send setInstrument message");
+    }
 }
 
 void Juce4Unity_SamplerAudioProcessor::clearInstruments()
 {
     auto l = juce::ScopedLock(instrumentLock);
     synth.clearSounds();
-    send(OSCInstrumentsCleared);
+    if (!send(OSCInstrumentsCleared))
+    {
+        logMessage("Failed to send clearInstruments message");
+    }
 }
 
 void Juce4Unity_SamplerAudioProcessor::noteOn(const int channel, const int midi, const float velocity)
@@ -160,7 +196,10 @@ void Juce4Unity_SamplerAudioProcessor::reset()
         synth.allNotesOff(i, false);
     }
     AudioProcessor::reset();
-    send(OSCResetComplete);
+    if (!send(OSCResetComplete))
+    {
+        logMessage("Failed to send reset message");
+    }
 }
 
 const juce::SynthesiserSound::Ptr Juce4Unity_SamplerAudioProcessor::getInstrumentForPath(const juce::String& path) const
@@ -217,6 +256,11 @@ void Juce4Unity_SamplerAudioProcessor::oscMessageReceived(const juce::OSCMessage
     {
         gain = message[0].getFloat32();
     }
+}
+
+void Juce4Unity_SamplerAudioProcessor::logMessage(const juce::String& message) const
+{
+    logger->logMessage(message);
 }
 
 //==============================================================================

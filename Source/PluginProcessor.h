@@ -95,6 +95,8 @@ private:
     juce::ReferenceCountedArray<juce::SynthesiserSound> instruments;
     juce::HashMap<juce::String, const juce::SynthesiserSound*> instrumentMap;
 
+    juce::FileLogger* logger;
+
     const juce::SynthesiserSound::Ptr getInstrumentForPath(const juce::String& path) const;
 
     void loadInstrument(const juce::String& sfzFilePath);
@@ -110,6 +112,8 @@ private:
     void reset() override;
 
     void oscMessageReceived(const juce::OSCMessage& message) override;
+
+    void logMessage(const juce::String& message) const;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Juce4Unity_SamplerAudioProcessor)
