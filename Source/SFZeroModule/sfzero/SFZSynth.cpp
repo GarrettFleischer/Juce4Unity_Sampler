@@ -113,7 +113,7 @@ void sfzero::Synth::noteOff(int midiChannel, int midiNoteNumber, float velocity,
     sfzero::Region *region = sound->getRegionFor(midiNoteNumber, noteVelocities_[midiNoteNumber], sfzero::Region::release);
     if (region)
     {
-      sfzero::Voice *voice = dynamic_cast<sfzero::Voice *>(findFreeVoice(sound, midiNoteNumber, midiChannel, false));
+      sfzero::Voice *voice = dynamic_cast<sfzero::Voice *>(findFreeVoice(sound, midiChannel, midiNoteNumber, false));
       if (voice)
       {
         // Synthesiser is too locked-down (ivars are private rt protected), so
