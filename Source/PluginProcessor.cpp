@@ -12,7 +12,7 @@
 Juce4Unity_SamplerAudioProcessor::Juce4Unity_SamplerAudioProcessor()
     :
 #ifndef JucePlugin_PreferredChannelConfigurations
-    Juce4UnityAudioProcessor(BusesProperties()
+    AudioProcessor(BusesProperties()
 #if ! JucePlugin_IsMidiEffect
 #if ! JucePlugin_IsSynth
         .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
@@ -31,10 +31,30 @@ Juce4Unity_SamplerAudioProcessor::Juce4Unity_SamplerAudioProcessor()
 
     synth.clearSounds();
     synth.setNoteStealingEnabled(true);
+
+    if (OSCReceiver::connect(6923))
+    {
+        OSCReceiver::addListener(this, OSCNoteOn);
+        OSCReceiver::addListener(this, OSCNoteOff);
+        OSCReceiver::addListener(this, OSCAllNotesOff);
+        OSCReceiver::addListener(this, OSCLoadInstrument);
+        OSCReceiver::addListener(this, OSCUnloadInstrument);
+        OSCReceiver::addListener(this, OSCSetInstrument);
+        OSCReceiver::addListener(this, OSCClearInstruments);
+        OSCReceiver::addListener(this, OSCReset);
+        OSCReceiver::addListener(this, OSCSetGain);
+
+        if (!OSCSender::connect("127.0.0.1", 6942))
+        {
+            OSCReceiver::disconnect();
+        }
+    }
 }
 
 Juce4Unity_SamplerAudioProcessor::~Juce4Unity_SamplerAudioProcessor()
 {
+    OSCReceiver::disconnect();
+    OSCSender::disconnect();
     instruments.clear();
     instrumentMap.clear();
     synth.clearSounds();
@@ -64,32 +84,39 @@ void Juce4Unity_SamplerAudioProcessor::releaseResources()
     // spare memory, etc.
 }
 
-void Juce4Unity_SamplerAudioProcessor::loadInstrument(const juce::File& sfzFile)
+void Juce4Unity_SamplerAudioProcessor::loadInstrument(const juce::String& sfzFilePath)
 {
-    auto l = juce::ScopedLock(instrumentLock);
-    const auto sound = new sfzero::Sound(sfzFile);
-    sound->loadRegions();
-    sound->loadSamples(&audioFormatManager);
+    try
+    {
+        const auto sfzFile = juce::File(sfzFilePath);
+        auto l = juce::ScopedLock(instrumentLock);
+        const auto sound = new sfzero::Sound(sfzFile);
+        sound->loadRegions();
+        sound->loadSamples(&audioFormatManager);
 
-    instruments.add(sound);
-    const auto& path = sfzFile.getFullPathName();
-    instrumentMap.set(path, sound);
+        instruments.add(sound);
+        const auto& path = sfzFile.getFullPathName();
+        instrumentMap.set(path, sound);
+
+        send(OSCInstrumentLoaded, path);
+    }
+    catch (const std::exception& e)
+    {
+        send(OSCLoadInstrumentError, sfzFilePath, juce::String(e.what()));
+    }
+    catch (const char* e)
+    {
+        send(OSCLoadInstrumentError, sfzFilePath, juce::String(e));
+    }
 }
 
 void Juce4Unity_SamplerAudioProcessor::unloadInstrument(const juce::String& path)
 {
     auto l = juce::ScopedLock(instrumentLock);
-    const auto soundToRemove = getInstrumentForPath(path);
     instruments.remove(instruments.indexOf(instrumentMap[path]));
     instrumentMap.remove(path);
-    for (int i = 0; i < synth.getNumSounds(); ++i)
-    {
-        if(synth.getSound(i) == soundToRemove)
-        {
-            synth.removeSound(i);
-            break;
-        }
-    }
+    synth.clearSounds();
+    send(OSCInstrumentUnloaded);
 }
 
 void Juce4Unity_SamplerAudioProcessor::setInstrument(const juce::String& path)
@@ -97,12 +124,14 @@ void Juce4Unity_SamplerAudioProcessor::setInstrument(const juce::String& path)
     auto l = juce::ScopedLock(instrumentLock);
     synth.clearSounds();
     synth.addSound(getInstrumentForPath(path));
+    send(OSCInstrumentSet);
 }
 
 void Juce4Unity_SamplerAudioProcessor::clearInstruments()
 {
     auto l = juce::ScopedLock(instrumentLock);
     synth.clearSounds();
+    send(OSCInstrumentsCleared);
 }
 
 void Juce4Unity_SamplerAudioProcessor::noteOn(const int channel, const int midi, const float velocity)
@@ -131,12 +160,63 @@ void Juce4Unity_SamplerAudioProcessor::reset()
         synth.allNotesOff(i, false);
     }
     AudioProcessor::reset();
+    send(OSCResetComplete);
 }
 
 const juce::SynthesiserSound::Ptr Juce4Unity_SamplerAudioProcessor::getInstrumentForPath(const juce::String& path) const
 {
     auto l = juce::ScopedLock(instrumentLock);
     return instruments[instruments.indexOf(instrumentMap[path])];
+}
+
+void Juce4Unity_SamplerAudioProcessor::oscMessageReceived(const juce::OSCMessage& message)
+{
+    const auto pattern = message.getAddressPattern();
+    if (pattern.matches(OSCNoteOn))
+    {
+        const auto channel = message[0].getInt32();
+        const auto midi = message[1].getInt32();
+        const auto velocity = message[2].getFloat32();
+        noteOn(channel, midi, velocity);
+    }
+    else if (pattern.matches(OSCNoteOff))
+    {
+        const auto channel = message[0].getInt32();
+        const auto midi = message[1].getInt32();
+        noteOff(channel, midi);
+    }
+    else if (pattern.matches(OSCAllNotesOff))
+    {
+        const auto channel = message[0].getInt32();
+        allNotesOff(channel);
+    }
+    else if (pattern.matches(OSCSetInstrument))
+    {
+        const auto id = message[0].getString();
+        setInstrument(id);
+    }
+    else if (pattern.matches(OSCClearInstruments))
+    {
+        clearInstruments();
+    }
+    else if (pattern.matches(OSCLoadInstrument))
+    {
+        const auto instrument = message[0].getString();
+        loadInstrument(instrument);
+    }
+    else if (pattern.matches(OSCUnloadInstrument))
+    {
+        const auto id = message[0].getString();
+        unloadInstrument(id);
+    }
+    else if (pattern.matches(OSCReset))
+    {
+        reset();
+    }
+    else if (pattern.matches(OSCSetGain))
+    {
+        gain = message[0].getFloat32();
+    }
 }
 
 //==============================================================================

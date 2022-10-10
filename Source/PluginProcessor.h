@@ -9,7 +9,6 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include <juce_audio_plugin_client/Unity/Juce4UnityAudioProcessor.h>
 
 #include "SFZeroModule/SFZero.h"
 
@@ -17,7 +16,14 @@
 //==============================================================================
 /**
 */
-class Juce4Unity_SamplerAudioProcessor : public juce::Juce4UnityAudioProcessor
+class Juce4Unity_SamplerAudioProcessor :
+    public juce::AudioProcessor,
+    juce::OSCReceiver,
+    juce::OSCReceiver::ListenerWithOSCAddress<juce::OSCReceiver::RealtimeCallback>,
+    juce::OSCSender
+#if JucePlugin_Enable_ARA
+                             , public juce::AudioProcessorARAExtension
+#endif
 {
 public:
     //==============================================================================
@@ -27,8 +33,6 @@ public:
     //==============================================================================
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
-    
-    void reset() override;
 
 #ifndef JucePlugin_PreferredChannelConfigurations
     bool isBusesLayoutSupported(const BusesLayout& layouts) const override;
@@ -58,19 +62,30 @@ public:
     //==============================================================================
     void getStateInformation(juce::MemoryBlock& destData) override;
     void setStateInformation(const void* data, int sizeInBytes) override;
-    
-    void loadInstrument(const juce::File& sfzFile) override;
-    void unloadInstrument(const juce::String& path) override;
-    void clearInstruments() override;
-    
-    void setInstrument(const juce::String& path) override;
-    
-    void noteOn(int channel, int midi, float velocity) override;
-    void noteOff(int channel, int midi) override;
-
-    void allNotesOff(int channel) override;
 
 private:
+    const juce::OSCAddress OSCNoteOn{"/Juce4Unity/NoteOn"};
+    const juce::OSCAddress OSCNoteOff{"/Juce4Unity/NoteOff"};
+    const juce::OSCAddress OSCAllNotesOff{"/Juce4Unity/AllNotesOff"};
+    
+    const juce::OSCAddress OSCSetGain{"/Juce4Unity/SetGain"};
+    
+    const juce::OSCAddress OSCSetInstrument{"/Juce4Unity/SetInstrument"};
+    const juce::OSCAddressPattern OSCInstrumentSet{"/Juce4Unity/InstrumentSet"};
+    
+    const juce::OSCAddress OSCClearInstruments{"/Juce4Unity/ClearInstruments"};
+    const juce::OSCAddressPattern OSCInstrumentsCleared{"/Juce4Unity/InstrumentsCleared"};
+    
+    const juce::OSCAddress OSCUnloadInstrument{"/Juce4Unity/UnloadInstrument"};
+    const juce::OSCAddressPattern OSCInstrumentUnloaded{"/Juce4Unity/InstrumentUnloaded"};
+    
+    const juce::OSCAddress OSCReset{"/Juce4Unity/Reset"};
+    const juce::OSCAddressPattern OSCResetComplete{"/Juce4Unity/ResetComplete"};
+
+    const juce::OSCAddress OSCLoadInstrument{"/Juce4Unity/LoadInstrument"};
+    const juce::OSCAddressPattern OSCInstrumentLoaded{"/Juce4Unity/InstrumentLoaded"};
+    const juce::OSCAddressPattern OSCLoadInstrumentError{"/Juce4Unity/LoadInstrumentError"};
+
     float gain{1.0};
 
     juce::AudioFormatManager audioFormatManager;
@@ -81,6 +96,20 @@ private:
     juce::HashMap<juce::String, const juce::SynthesiserSound*> instrumentMap;
 
     const juce::SynthesiserSound::Ptr getInstrumentForPath(const juce::String& path) const;
+
+    void loadInstrument(const juce::String& sfzFilePath);
+    void unloadInstrument(const juce::String& path);
+    void setInstrument(const juce::String& path);
+    void clearInstruments();
+
+    void noteOn(int channel, int midi, float velocity);
+    void noteOff(int channel, int midi);
+
+    void allNotesOff(int channel);
+
+    void reset() override;
+
+    void oscMessageReceived(const juce::OSCMessage& message) override;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Juce4Unity_SamplerAudioProcessor)
