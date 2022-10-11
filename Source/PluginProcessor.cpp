@@ -25,7 +25,7 @@ Juce4Unity_SamplerAudioProcessor::Juce4Unity_SamplerAudioProcessor()
     logger = juce::FileLogger::createDefaultAppLogger(
         "Juce4UnitySampler",
         "Juce4UnitySampler.log",
-        "################################################");
+        "");
 
     audioFormatManager.registerBasicFormats();
 
@@ -210,51 +210,70 @@ const juce::SynthesiserSound::Ptr Juce4Unity_SamplerAudioProcessor::getInstrumen
 
 void Juce4Unity_SamplerAudioProcessor::oscMessageReceived(const juce::OSCMessage& message)
 {
-    const auto pattern = message.getAddressPattern();
-    if (pattern.matches(OSCNoteOn))
+    try
     {
-        const auto channel = message[0].getInt32();
-        const auto midi = message[1].getInt32();
-        const auto velocity = message[2].getFloat32();
-        noteOn(channel, midi, velocity);
+        const auto pattern = message.getAddressPattern();
+        logMessage("Processing: " + pattern.toString());
+        if (pattern.matches(OSCNoteOn))
+        {
+            const auto blob = message[0].getBlob();
+            int channel;
+            int midi;
+            float velocity;
+            blob.copyTo(&channel, 0, 4);
+            blob.copyTo(&midi, 4, 4);
+            blob.copyTo(&velocity, 8, 4);
+            noteOn(channel, midi, velocity);
+        }
+        else if (pattern.matches(OSCNoteOff))
+        {
+            const auto blob = message[0].getBlob();
+            int channel;
+            int midi;
+            blob.copyTo(&channel, 0, 4);
+            blob.copyTo(&midi, 4, 4);
+            noteOff(channel, midi);
+        }
+        else if (pattern.matches(OSCAllNotesOff))
+        {
+            const auto channel = message[0].getInt32();
+            allNotesOff(channel);
+        }
+        else if (pattern.matches(OSCSetInstrument))
+        {
+            const auto id = message[0].getString();
+            setInstrument(id);
+        }
+        else if (pattern.matches(OSCClearInstruments))
+        {
+            clearInstruments();
+        }
+        else if (pattern.matches(OSCLoadInstrument))
+        {
+            const auto instrument = message[0].getString();
+            loadInstrument(instrument);
+        }
+        else if (pattern.matches(OSCUnloadInstrument))
+        {
+            const auto id = message[0].getString();
+            unloadInstrument(id);
+        }
+        else if (pattern.matches(OSCReset))
+        {
+            reset();
+        }
+        else if (pattern.matches(OSCSetGain))
+        {
+            gain = message[0].getFloat32();
+        }
     }
-    else if (pattern.matches(OSCNoteOff))
+    catch (const std::exception& e)
     {
-        const auto channel = message[0].getInt32();
-        const auto midi = message[1].getInt32();
-        noteOff(channel, midi);
+        logMessage(e.what());
     }
-    else if (pattern.matches(OSCAllNotesOff))
+    catch (const char * e)
     {
-        const auto channel = message[0].getInt32();
-        allNotesOff(channel);
-    }
-    else if (pattern.matches(OSCSetInstrument))
-    {
-        const auto id = message[0].getString();
-        setInstrument(id);
-    }
-    else if (pattern.matches(OSCClearInstruments))
-    {
-        clearInstruments();
-    }
-    else if (pattern.matches(OSCLoadInstrument))
-    {
-        const auto instrument = message[0].getString();
-        loadInstrument(instrument);
-    }
-    else if (pattern.matches(OSCUnloadInstrument))
-    {
-        const auto id = message[0].getString();
-        unloadInstrument(id);
-    }
-    else if (pattern.matches(OSCReset))
-    {
-        reset();
-    }
-    else if (pattern.matches(OSCSetGain))
-    {
-        gain = message[0].getFloat32();
+        logMessage(e);
     }
 }
 
